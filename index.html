@@ -410,6 +410,11 @@
   .lineout { font-family: var(--mono); font-size: 0.64rem; color: var(--muted); margin-top: 0.2rem; line-height: 1.35; }
   .lineout div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .lineout.solo { margin: -0.25rem 0 0.5rem 0.2rem; }
+  .eq-item select { margin-bottom: 0.2rem; }
+  .eq-item .eq-row { display: grid; grid-template-columns: 1fr 90px; gap: 0.4rem; align-items: center; font-size: 0.72rem; color: var(--muted); margin: 0.15rem 0; }
+  .eq-item .eq-src { font-size: 0.62rem; color: var(--muted); margin-top: 0.1rem; line-height: 1.3; }
+  .eq-item.inactive { opacity: 0.5; }
+  button.btn.small { padding: 0.3rem 0.55rem; font-size: 0.7rem; font-weight: 500; width: 100%; margin-top: 0.3rem; }
   .subhead { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0.2rem 0 0.45rem; border-top: 1px solid var(--border); padding-top: 0.55rem; }
   details.model-notes table.lines tr.cat td { background: var(--bg3); color: var(--text); font-weight: 600; }
   details.model-notes table.lines td.num, details.model-notes table.lines th.num { text-align: right; font-family: var(--mono); white-space: nowrap; }
@@ -700,75 +705,20 @@
       </div>
     </details>
 
-    <!-- E. Equipment -->
+    <!-- E. Equipment configurator -->
     <details class="acc" open>
-      <summary>E · Equipment</summary>
+      <summary>E · Equipment configurator</summary>
       <div class="acc-body">
-        <div class="param">
-          <label>LED lights qty (ea) <span class="hint">11-040 · recommended 3 ea</span></label>
-          <div class="row">
-            <input type="range" id="lights" min="0" max="12" step="1" value="9" />
-            <input type="number" id="lightsN" min="0" max="12" step="1" value="9" />
-          </div>
-        </div>
-        <div class="param">
-          <label>Light $/ea installed <span class="hint">quoted $600/ea</span></label>
-          <div class="row">
-            <input type="range" id="lightUnit" min="300" max="800" step="10" value="600" />
-            <input type="number" id="lightUnitN" min="300" max="800" step="10" value="600" />
-          </div>
-          <div class="lineout" data-codes="11-040"></div>
-        </div>
-        <div class="param">
-          <label>Pump package</label>
-          <select id="pumpMode">
-            <option value="quoted" selected>Quoted</option>
-            <option value="owner">Owner-supply Stan</option>
-            <option value="none">None</option>
-          </select>
-          <div class="lineout" data-codes="11-010"></div>
-        </div>
-        <div class="param">
-          <label>Filter</label>
-          <select id="filterMode">
-            <option value="quoted" selected>Quoted</option>
-            <option value="owner">Owner-supply</option>
-            <option value="none">None</option>
-          </select>
-          <div class="lineout" data-codes="11-020"></div>
-        </div>
         <div class="toggle-row">
-          <span>Salt system include</span>
-          <input type="checkbox" id="saltOn" checked />
-        </div>
-        <div class="lineout solo" data-codes="11-030,08-020"></div>
-        <div class="toggle-row">
-          <span>Heater include (HTR-*)</span>
-          <input type="checkbox" id="heaterOn" checked />
-        </div>
-        <div class="lineout solo" data-codes="HTR-02,HTR-04"></div>
-        <div class="param">
-          <label>Automation</label>
-          <select id="autMode">
-            <option value="quoted" selected>Quoted $2,800</option>
-            <option value="owner">Owner AquaLink credit</option>
-            <option value="none">None</option>
-          </select>
-          <div class="lineout" data-codes="AUT-01"></div>
-        </div>
-        <div class="param">
-          <label>Blower</label>
-          <select id="blowerMode">
-            <option value="quoted" selected>Quoted</option>
-            <option value="owner">Owner-supply</option>
-            <option value="none">None</option>
-          </select>
-          <div class="lineout" data-codes="SPA-16"></div>
-        </div>
-        <div class="toggle-row">
-          <span>Owner-supply master<br/><span class="hint">pump / filter / blower / AUT credit</span></span>
+          <span>Owner-supply all (MT Pool)<br/><span class="hint">pump / filter / lights / blower / AUT credit</span></span>
           <input type="checkbox" id="ownerSupply" />
         </div>
+        <div id="equipItems"></div>
+        <div class="scale-pills">
+          <div class="pill"><span>equipment </span><strong id="eqSubtotal">—</strong></div>
+          <div class="pill" id="eqOwnerPaidPill"><span>owner-paid, not in Direct </span><strong id="eqOwnerPaid">$0</strong></div>
+        </div>
+        <button type="button" class="btn small" id="btnClearCustom">Clear my custom prices</button>
       </div>
     </details>
 
@@ -1001,9 +951,12 @@
         Temp fence toggles <code>03-010</code>.</p>
         <p><strong>Depth / water SF:</strong> avg depth factor scales Area basis (volume proxy). Water SF override replaces
         auto water SF display and rescales Area vs baseline water SF when set &gt; 0.</p>
-        <p><strong>Lights:</strong> qty (ea) × $/ea (default 9 ea × $600/ea). Recommend 3 ea. Owner-supply master sets $436/ea.</p>
-        <p><strong>Owner-supply (Stan MT Pool):</strong> pump <code>$1,491.30</code>, filter <code>$1,151.41</code>,
-        blower <code>$240.42</code>, AUT credit <code>$0</code> (saves $2,800 quoted AquaLink).</p>
+        <p><strong>Equipment configurator (E):</strong> every Equipment-KPI line has Quoted (Indigo) / Owner-supplied — MT Pool (where Stan has an invoice) /
+        Local fair / retail (existing audit fair mid) / Custom $ (your $/ea or lump sum, saved in this browser) / Not included.
+        Lights: qty (ea) × $/ea (default 9 ea × $600/ea; recommend 3 ea). Owner-supplied items stay in Direct at Stan's MT Pool cost
+        (pump <code>$1,491.30</code>, filter <code>$1,151.41</code>, lights <code>$435.67/ea</code>, blower <code>$240.42</code>, pads + J-box <code>$256.91</code>);
+        AUT-01 owner = <code>$0</code> credit with Stan's AquaLink <code>$4,238.83</code> shown separately (not in Direct).
+        Custom fair = min(your price, fair mid). Salt and heater include toggles gate 11-030/08-020 and HTR-*/08-030.</p>
         <p><strong>Fair mid:</strong> audit Fair Mid baselines × same scale factors; shotcrete fair $220/CY; forms fair $20/LF
         (quoted bars use your sliders). Fair $/unit is always shown in the quote's own unit for that line.</p>
         <p><strong>Units:</strong> every line carries its unit of measure exactly as written in Indigo's Budget sheet —
@@ -1088,7 +1041,7 @@ function lineText(o) {
   const r = o.row;
   if (o.off) return r.c + ' off · quoted ' + fmtQty(r.q, r.m) + ' ' + r.m + ' × ' + unitPrice(r.u, r.m, r.q);
   if (o.mode === 'none') return r.c + ' not included (' + r.m + ')';
-  const tag = o.mode === 'owner' ? ' (owner)' : (o.mode === 'actual' ? ' (actual)' : '');
+  const tag = { owner: ' (owner)', actual: ' (actual)', fair: ' (fair)', custom: ' (custom)' }[o.mode] || '';
   if (r.m === 'ls' && Math.abs(o.qty - 1) < 1e-9) return r.c + ' 1 ls · ' + unitPrice(o.unit, r.m, o.qty) + tag;
   return r.c + ' ' + fmtQty(o.qty, r.m) + ' ' + r.m + ' × ' + unitPrice(o.unit, r.m, o.qty) + ' = ' + money(o.ext) + tag;
 }
@@ -1130,7 +1083,6 @@ function getParams() {
     L: +$('len').value,
     W: +$('wid').value,
     lights: +$('lights').value,
-    lightUnit: +$('lightUnit').value,
     spaOn: $('spaOn').checked,
     spaL: +$('spaL').value,
     spaW: +$('spaW').value,
@@ -1154,12 +1106,14 @@ function getParams() {
     plaster: +$('plaster').value,
     plasterGrade: +$('plasterGrade').value,
     wftOn: $('wftOn').checked,
-    pumpMode: $('pumpMode').value,
-    filterMode: $('filterMode').value,
+    eq: Object.fromEntries(EQUIP.filter(x => x.c).map(x => [x.c, $('eq_' + x.c).value])),
+    eqU: Object.fromEntries(EQUIP.filter(x => x.c).map(x => [x.c, Math.max(0, +$('eqU_' + x.c).value || 0)])),
+    pumpMode: $('eq_11-010').value,
+    filterMode: $('eq_11-020').value,
     saltOn: $('saltOn').checked,
     heaterOn: $('heaterOn').checked,
-    autMode: $('autMode').value,
-    blowerMode: $('blowerMode').value,
+    autMode: $('eq_AUT-01').value,
+    blowerMode: $('eq_SPA-16').value,
     owner: $('ownerSupply').checked,
     fee: $('feeModel').value,
     customFee: +$('customFee').value,
@@ -1178,6 +1132,102 @@ function getParams() {
 const SOFT_CTRL = { 'ENG-01': 'eng', '01-010': 'design', '01-020': 'permRunner', '02-010': 'permBldg',
   '02-020': 'permPlumb', '02-030': 'permElec', '02-040': 'permDerm' };
 const PERMIT_PRESETS = { quoted: { permBldg: 2000, permElec: 900 }, actual: { permBldg: 800, permElec: 149 } };
+
+// ---- Equipment configurator ----
+// Options per equipment line (Equipment KPI set). Prices only from existing data:
+//  quoted = Indigo Quote #26072701 unit cost; owner = Stan's MT Pool invoices (Owner Supply sheet / audit);
+//  fair = existing dashboard fair value (audit Fair Mid; lights = $550/ea installed cap already used by this model).
+// Owner-supplied items keep Stan's cost inside the line (as the original owner-supply toggles did); AUT-01 owner = $0 credit,
+// with Stan's AquaLink purchase tracked separately (not in Direct).
+const EQ_MODE_LABEL = { quoted: 'Quoted (Indigo)', owner: 'Owner-supplied — MT Pool', fair: 'Local fair / retail', custom: 'Custom $', none: 'Not included / $0' };
+const EQUIP = [
+  { c: '11-010', label: 'Pump', none: true, quoted: 'Pentair IntelliFlo3 VSF',
+    owner: { u: 1491.30, name: 'Jandy FloPro 2.7HP (JNOVSFHP270DV2A)', src: 'MT Pool inv 0029253085 (8/27/26)' },
+    fair: { u: 1869, name: 'fair mid', src: 'audit: online $1,687 (BestPoolShop) – $2,050 (Pools&Surfaces Delray)' } },
+  { c: '11-020', label: 'Filter', none: true, quoted: 'Pentair CCP 420 cartridge',
+    owner: { u: 1151.41, name: 'Jandy Pro 460 sq ft cartridge (JNDCV46D)', src: 'MT Pool inv 0029253085 (8/27/26)' },
+    fair: { u: 1510, name: 'retail mid', src: "audit: CCP 420 retail $1,400–$1,619 (Leslie's / AllPoolFilters)" } },
+  { toggle: 'saltOn', label: 'Salt system include', hint: '11-030 + 08-020' },
+  { c: '11-030', label: 'Salt system / chlorinator', quoted: 'Pentair IntelliChlor+ 40k',
+    fair: { u: 2175, name: 'fair mid', src: 'audit: cell $1,429–$1,649 + power center $500–$800 → $1,900–$2,450' } },
+  { c: '08-020', label: 'Salt system hook-up', none: true, quoted: 'hook-up',
+    fair: { u: 137.5, name: 'fair mid', src: 'audit: $75–$200' } },
+  { c: '11-040', label: 'Pool lights (LED)', qtyCtl: true, quoted: 'LED, installed',
+    owner: { u: 435.67, name: "Jandy WaterColors NL RGBW 100' 12W", src: 'MT Pool inv 0029336395 (8/31/26), 2 bought @ $435.67' },
+    fair: { u: 550, name: 'installed fair cap', src: 'audit: installed $485–$650, online ~$490; model caps fair at $550/ea' } },
+  { c: '11-050', label: 'White goods & misc', none: true, quoted: 'allowance',
+    owner: { u: 256.91, name: 'pads 2× Diversitech $207.80 + Intermatic J-box $49.11', src: 'Owner Supply sheet (MT Pool inv 0029253085); other white goods may still be needed' },
+    fair: { u: 600, name: 'fair mid', src: 'audit: $400–$800' } },
+  { c: '11-060', label: 'Equipment install labor – pool', none: true, quoted: 'labor',
+    fair: { u: 1125, name: 'fair mid', src: 'audit: $750–$1,500' } },
+  { toggle: 'heaterOn', label: 'Heater include', hint: 'HTR-* + 08-030' },
+  { c: 'HTR-02', label: 'Heater', quoted: 'Pentair UltraTemp 140',
+    fair: { u: 5948, name: 'retail mid', src: 'audit: $5,160 (PoolCleaningParts) – $6,736 (Inyo); Wellbots $5,700, PoolSupply4U $5,999' } },
+  { c: 'HTR-03', label: 'Heater install (set & plumb)', none: true, quoted: 'install',
+    fair: { u: 800, name: 'fair mid', src: 'audit: $400–$1,200 typical ($0 flag in quote)' } },
+  { c: 'HTR-04', label: 'Heater electrical', none: true, quoted: 'breaker + wire',
+    fair: { u: 425, name: 'fair mid', src: 'audit: $250–$600' } },
+  { c: '08-030', label: 'Heater-ready provision', none: true, quoted: 'provision',
+    fair: { u: 162.5, name: 'fair mid', src: 'audit: $75–$250' } },
+  { c: 'AUT-01', label: 'Automation', none: true, quoted: 'Indigo package (unit + install)',
+    owner: { u: 0, paid: 4238.83, name: 'Jandy AquaLink RS PS6 owned → $0 credit', src: 'MT Pool inv 0029494269 (9/9/26) $4,238.83 paid by Stan — tracked outside Direct' } },
+  { c: 'SPA-16', label: 'Spa blower', none: true, quoted: 'unit + install',
+    owner: { u: 240.42, name: 'Jandy Pro 2HP blower 240V (JNDPSB220)', src: 'MT Pool inv 0029253085 (8/27/26)' },
+    fair: { u: 300, name: 'fair mid', src: 'audit: $240–$400' } },
+  { c: 'SPA-17', label: 'Equipment install adder – spa', none: true, quoted: 'install adder',
+    fair: { u: 250, name: 'fair mid', src: 'audit: $150–$350' } }
+];
+const EQUIP_BY_CODE = Object.fromEntries(EQUIP.filter(x => x.c).map(x => [x.c, x]));
+const OWNER_MASTER_CODES = ['11-010', '11-020', '11-040', 'SPA-16', 'AUT-01'];
+const EQ_STORE_KEY = 'contractorsDashboard.equipCustom.v1';
+function lineByCode(c) { return LINES.find(l => l.c === c); }
+function loadCustom() { try { return JSON.parse(localStorage.getItem(EQ_STORE_KEY) || '{}') || {}; } catch (e) { return {}; } }
+function saveCustom(obj) { try { localStorage.setItem(EQ_STORE_KEY, JSON.stringify(obj)); } catch (e) { /* storage unavailable */ } }
+
+function renderEquipConfig() {
+  const stored = loadCustom();
+  const html = EQUIP.map(it => {
+    if (it.toggle) {
+      return '<div class="toggle-row"><span>' + it.label + ' <span class="hint">' + it.hint + '</span></span>' +
+        '<input type="checkbox" id="' + it.toggle + '" checked /></div>';
+    }
+    const row = lineByCode(it.c), m = row.m;
+    const per = m === 'ls' ? ' lump sum' : '/' + m;
+    const opt = (k, txt, title) => '<option value="' + k + '" title="' + escAttr(title || '') + '">' + txt + '</option>';
+    let opts = opt('quoted', EQ_MODE_LABEL.quoted + ' · ' + unitPrice(row.u, m, 1) + ' — ' + it.quoted, 'Quote #26072701 ' + it.c);
+    if (it.owner) opts += opt('owner', EQ_MODE_LABEL.owner + ' · ' + unitPrice(it.owner.u, m, 1) + ' — ' + it.owner.name, it.owner.src);
+    if (it.fair) opts += opt('fair', EQ_MODE_LABEL.fair + ' · ' + unitPrice(it.fair.u, m, 1) + ' — ' + it.fair.name, it.fair.src);
+    opts += opt('custom', EQ_MODE_LABEL.custom + ' (your price' + per + ')', 'Type your own price; saved in this browser');
+    if (it.none) opts += opt('none', EQ_MODE_LABEL.none, '');
+    const cu = stored[it.c] !== undefined ? stored[it.c] : row.u;
+    const qtyHtml = it.qtyCtl
+      ? '<label style="margin-top:.2rem">Qty (ea) <span class="hint">recommended 3 ea</span></label><div class="row">' +
+        '<input type="range" id="lights" min="0" max="12" step="1" value="9" /><input type="number" id="lightsN" min="0" max="12" step="1" value="9" /></div>'
+      : '';
+    return '<div class="param eq-item" id="eqi_' + it.c + '">' +
+      '<label>' + it.label + ' <span class="hint">' + it.c + ' · ' + fmtQty(row.q, m) + ' ' + m + '</span></label>' +
+      '<select id="eq_' + it.c + '">' + opts + '</select>' +
+      '<div class="eq-row" id="eqc_' + it.c + '" style="display:none"><span>Custom ' + (m === 'ls' ? '$ (lump sum)' : '$/' + m) + '</span>' +
+      '<input type="number" id="eqU_' + it.c + '" min="0" step="0.01" value="' + cu + '" /></div>' +
+      qtyHtml +
+      '<div class="eq-src" id="eqs_' + it.c + '"></div>' +
+      '<div class="lineout" data-codes="' + it.c + '"></div></div>';
+  }).join('');
+  $('equipItems').innerHTML = html;
+}
+function refreshEquipUI() {
+  for (const it of EQUIP) {
+    if (!it.c) continue;
+    const mode = $('eq_' + it.c).value;
+    $('eqc_' + it.c).style.display = mode === 'custom' ? 'grid' : 'none';
+    const src = mode === 'owner' && it.owner ? it.owner.name + ' · ' + it.owner.src : (mode === 'fair' && it.fair ? it.fair.src :
+      (mode === 'custom' ? 'your price (saved in this browser)' : (mode === 'none' ? '' : it.quoted + ' · Indigo Quote #26072701')));
+    $('eqs_' + it.c).textContent = src;
+  }
+}
+function syncOwnerMasterCheckbox() {
+  if (!OWNER_MASTER_CODES.every(c => $('eq_' + c).value === 'owner')) $('ownerSupply').checked = false;
+}
 
 function scaleFor(basis, p, sa, sp) {
   if (!p.spaOn && (basis === 'SpaArea' || basis === 'SpaPerimeter')) return 0;
@@ -1209,7 +1259,7 @@ function compute(p) {
 
   let shotcreteQuoted = 0, shotcreteFair = 0, formsQuoted = 0, formsFair = 0;
   let lightsQuoted = 0, permitBldg = 0, permitElec = 0, blueprints = 0;
-  let pumpSave = 0, filterSave = 0, autSave = 0;
+  let pumpSave = 0, filterSave = 0, autSave = 0, lightFairU = 550, ownerPaidOutside = 0;
 
   const lineOut = {};
   for (const row of LINES) {
@@ -1247,12 +1297,31 @@ function compute(p) {
       qty = qty * p.gravelMult;
     }
 
-    if (code === '11-040') {
-      qty = p.lights;
-      unitI = p.owner ? 436 : p.lightUnit;
-      extI = qty * unitI;
-      extF = qty * (p.owner ? 436 : Math.min(p.lightUnit, 550));
-      lightsQuoted = extI;
+    if (EQUIP_BY_CODE[code]) {
+      // Equipment configurator: quoted / owner (MT Pool) / fair / custom / none
+      const it = EQUIP_BY_CODE[code];
+      const mode = p.eq[code] || 'quoted';
+      if (code === '11-040') qty = p.lights;
+      const q1 = code === '11-040' ? qty : qty * sf;
+      const fairU = it.fair ? it.fair.u : (row.q > 0 ? row.f / row.q : 0);
+      if (mode === 'none') { unitI = 0; extI = 0; extF = 0; }
+      else if (mode === 'owner' && it.owner) {
+        unitI = it.owner.u; extI = q1 * unitI; extF = q1 * unitI;
+        if (it.owner.paid) ownerPaidOutside += it.owner.paid;
+      }
+      else if (mode === 'fair' && it.fair) { unitI = fairU; extI = q1 * unitI; extF = q1 * unitI; }
+      else if (mode === 'custom') { unitI = p.eqU[code]; extI = q1 * unitI; extF = q1 * Math.min(unitI, fairU); }
+      else { unitI = row.u; extI = q1 * unitI; extF = code === '11-040' ? q1 * Math.min(unitI, 550) : row.f * sf; }
+      if (code === '11-040') {
+        lightsQuoted = extI;
+        lightFairU = mode === 'owner' ? it.owner.u : Math.min(unitI, 550);
+      }
+      if (code === '11-010' || code === '11-020') {
+        const own = it.owner.u;
+        const sv = mode === 'none' ? 0 : (mode === 'owner' ? row.u - own : Math.max(0, extI - own));
+        if (code === '11-010') pumpSave = sv; else filterSave = sv;
+      }
+      if (code === 'AUT-01') autSave = (mode === 'quoted' || mode === 'custom') ? extI : 0;
     } else if (code === '06-010') {
       unitI = p.shotcrete;
       extI = qty * sf * unitI;
@@ -1299,25 +1368,6 @@ function compute(p) {
       unitI = row.u * (p.plaster / 5) * p.plasterGrade;
       extI = qty * sf * unitI;
       extF = row.f * sf * p.plasterGrade;
-    } else if (code === '11-010') {
-      if (p.pumpMode === 'none') { extI = 0; extF = 0; }
-      else if (p.pumpMode === 'owner') { extI = 1491.30; extF = 1491.30; pumpSave = row.u - 1491.30; }
-      else { extI = qty * sf * unitI; extF = row.f * sf; pumpSave = Math.max(0, extI - 1491.30); }
-    } else if (code === '11-020') {
-      if (p.filterMode === 'none') { extI = 0; extF = 0; }
-      else if (p.filterMode === 'owner') { extI = 1151.41; extF = 1151.41; filterSave = row.u - 1151.41; }
-      else { extI = qty * sf * unitI; extF = row.f * sf; filterSave = Math.max(0, extI - 1151.41); }
-    } else if (code === 'SPA-16') {
-      if (p.blowerMode === 'none') { extI = 0; extF = 0; }
-      else if (p.blowerMode === 'owner') { extI = 240.42; extF = 240.42; }
-      else { extI = qty * sf * unitI; extF = row.f * sf; }
-    } else if (code === 'AUT-01') {
-      if (p.autMode === 'none' || p.autMode === 'owner') {
-        extI = 0; extF = 0;
-        autSave = p.autMode === 'owner' ? 2800 : 0;
-      } else {
-        extI = qty * sf * unitI; extF = row.f * sf; autSave = 2800;
-      }
     } else if (SOFT_CTRL[code]) {
       // Soft costs: left-panel lump-sum $ replaces the quoted unit cost (qty 1 ls)
       unitI = p[SOFT_CTRL[code]];
@@ -1332,10 +1382,7 @@ function compute(p) {
     {
       const dq = code === '11-040' ? qty : qty * sf;
       let mode = '';
-      if ((code === '11-010' && p.pumpMode !== 'quoted') || (code === '11-020' && p.filterMode !== 'quoted') ||
-          (code === 'SPA-16' && p.blowerMode !== 'quoted') || (code === 'AUT-01' && p.autMode !== 'quoted')) {
-        mode = { '11-010': p.pumpMode, '11-020': p.filterMode, 'SPA-16': p.blowerMode, 'AUT-01': p.autMode }[code];
-      }
+      if (EQUIP_BY_CODE[code] && p.eq[code] && p.eq[code] !== 'quoted') mode = p.eq[code];
       if ((code === '02-010' || code === '02-030') && p.permitMode === 'actual') mode = 'actual';
       lineOut[code] = {
         row, off: false, mode, qty: dq,
@@ -1377,7 +1424,7 @@ function compute(p) {
     feeParts = { direct: quoted, gc: 0, fee: feeAmt, labels: ['Direct', 'Fee ' + (Math.round(rate * 1000) / 10) + '%'] };
   }
 
-  const lightSave = Math.max(0, lightsQuoted - (3 * (p.owner ? 436 : Math.min(p.lightUnit, 550))));
+  const lightSave = Math.max(0, lightsQuoted - (3 * lightFairU));
   const shotSave = Math.max(0, shotcreteQuoted - shotcreteFair);
   const formSave = Math.max(0, formsQuoted - formsFair);
   const LO = lineOut;
@@ -1385,7 +1432,7 @@ function compute(p) {
   const lumpNote = (c) => LO[c] && !LO[c].off ? '1 ls · ' + unitPrice(LO[c].unit, 'ls', LO[c].qty) + ' now' : '';
   const eaNote = (c) => LO[c] && !LO[c].off && LO[c].mode !== 'none' ? fmtQty(LO[c].qty, 'ea') + ' ea × ' + money2(LO[c].unit) + '/ea now' : 'not included';
   const savings = [
-    { rank: 1, item: 'LED lights → 3 ea practical', save: lightSave, note: p.lights + ' ea × ' + money2(p.owner ? 436 : p.lightUnit) + '/ea now' },
+    { rank: 1, item: 'LED lights → 3 ea practical', save: lightSave, note: p.lights + ' ea × ' + money2(LO['11-040'].unit) + '/ea now' },
     { rank: 2, item: 'Shotcrete → ~$220/CY', save: shotSave, note: fmtQty(LO['06-010'].qty, 'CY') + ' CY × $' + p.shotcrete + '/CY now' },
     { rank: 3, item: 'Building permit → published ~$800 lump sum', save: Math.max(0, permitBldg), note: lumpNote('02-010') + ' · Miami-Dade IO 4-63' },
     { rank: 4, item: 'Forms → ~$20/LF', save: formSave, note: fmtQty(formsLF, 'LF') + ' LF × $' + p.forms + '/LF now' },
@@ -1393,7 +1440,7 @@ function compute(p) {
     { rank: 6, item: 'Filter → Stan Jandy $1,151/ea', save: Math.max(0, filterSave), note: (p.filterMode === 'owner' ? 'credited · ' : 'owner-supply · ') + eaNote('11-020') },
     { rank: 7, item: 'Blueprints → ~$1,200 PE lump sum', save: Math.max(0, blueprints), note: lumpNote('01-010') + ' · compete package' },
     { rank: 8, item: 'Pump → Stan FloPro $1,491/ea', save: Math.max(0, pumpSave), note: (p.pumpMode === 'owner' ? 'credited · ' : 'owner-supply · ') + eaNote('11-010') },
-    { rank: 9, item: 'AUT-01 AquaLink credit $2,800 lump sum', save: p.autMode === 'owner' ? 0 : (p.autMode === 'quoted' ? autSave : 0), note: p.autMode === 'owner' ? 'already credited' : "1 ls · $2,800 lump sum · don't pay twice" },
+    { rank: 9, item: 'AUT-01 AquaLink credit (lump sum)', save: autSave, note: p.autMode === 'owner' ? 'already credited' : '1 ls · ' + unitPrice(LO['AUT-01'].unit, 'ls', 1) + " now · don't pay twice" },
     { rank: 10, item: '08-010 Elec pkg / load-center deduct', save: (p.pumpMode === 'owner' || p.owner) ? 0 : 500, note: lumpNote('08-010') + ' · Stan Intermatic ~$299' }
   ].filter(x => x.save > 25).sort((a, b) => b.save - a.save).slice(0, 8)
    .map((x, i) => ({ ...x, rank: i + 1 }));
@@ -1401,7 +1448,7 @@ function compute(p) {
   return {
     quoted, fair, billed, equip, shell, finish, site, plumb,
     catsI, catsF, feeParts,
-    sa, sp, waterSF, savings, lineOut, softDesign, softCounty,
+    sa, sp, waterSF, savings, lineOut, softDesign, softCounty, ownerPaidOutside,
     saveVsBaseline: BASE.baselineBilled - billed
   };
 }
@@ -1481,14 +1528,9 @@ function initCharts() {
 }
 
 function syncOwnerMaster() {
-  const on = $('ownerSupply').checked;
-  if (on) {
-    $('pumpMode').value = 'owner';
-    $('filterMode').value = 'owner';
-    $('blowerMode').value = 'owner';
-    $('autMode').value = 'owner';
-    $('lightUnit').value = 436;
-    $('lightUnitN').value = 436;
+  if ($('ownerSupply').checked) {
+    for (const c of OWNER_MASTER_CODES) $('eq_' + c).value = 'owner';
+    refreshEquipUI();
   }
 }
 
@@ -1522,6 +1564,10 @@ function updateUI() {
   $('kFinish').textContent = money(r.finish);
   $('kSite').textContent = money(r.site);
   $('kPlumb').textContent = money(r.plumb);
+  $('eqSubtotal').textContent = money(r.equip);
+  $('eqOwnerPaid').textContent = money(r.ownerPaidOutside);
+  $('eqOwnerPaidPill').style.display = r.ownerPaidOutside > 0 ? '' : 'none';
+  for (const it of EQUIP) if (it.c) $('eqi_' + it.c).classList.toggle('inactive', !!(r.lineOut[it.c] && r.lineOut[it.c].off));
   $('softDesign').textContent = money(r.softDesign);
   $('softCounty').textContent = money(r.softCounty);
   $('softTotal').textContent = money(r.softDesign + r.softCounty);
@@ -1604,7 +1650,7 @@ function renderLines(lineOut) {
     const up = none ? '—' : unitPrice(o.unit, m, o.qty);
     // qty 0 with a fair $ (BAR-01) = fair lump allowance, not expressible per unit
     const fu = none ? '—' : (o.qty === 0 && o.extF > 0 ? 'allowance' : (o.fairUnit === null || o.fairUnit === undefined ? '—' : unitPrice(o.fairUnit, m, o.qty)));
-    const tag = none ? ' (not included)' : (o.mode === 'owner' ? ' (owner-supply)' : (o.mode === 'actual' ? ' (actual fee)' : ''));
+    const tag = none ? ' (not included)' : ({ owner: ' (owner-supply)', actual: ' (actual fee)', fair: ' (local fair)', custom: ' (custom $)' }[o.mode] || '');
     const tip = row.c + ' ' + row.n + ': ' + fmtQty(o.qty, m) + ' ' + m + ' × ' + up + ' = ' + money(o.ext) +
       ' · fair ' + fu + ' = ' + money(o.extF) + tag + (o.qty === 0 && o.extF > 0 ? ' (fair is a lump allowance; quoted qty is 0 ' + m + ')' : '');
     return '<tr' + (none ? ' class="off"' : '') + ' title="' + escAttr(tip + (row.x ? ' — ' + row.x : '')) + '"><td>' + row.c + '</td><td>' + row.n + tag + '</td><td class="num">' +
@@ -1643,7 +1689,7 @@ function bindPair(rangeId, numId, lo, hi, step) {
 function setAll(vals) {
   const map = {
     L: ['len', 'lenN'], W: ['wid', 'widN'],
-    lights: ['lights', 'lightsN'], lightUnit: ['lightUnit', 'lightUnitN'],
+    lights: ['lights', 'lightsN'],
     spaL: ['spaL', 'spaLN'], spaW: ['spaW', 'spaWN'],
     depthFac: ['depthFac', 'depthFacN'], waterOverride: ['waterOverride', 'waterOverrideN'],
     excavMult: ['excavMult', 'excavMultN'], haulLoad: ['haulLoad', 'haulLoadN'],
@@ -1679,26 +1725,26 @@ function setAll(vals) {
   }
   if (vals.plasterGrade !== undefined) $('plasterGrade').value = vals.plasterGrade;
   if (vals.concType !== undefined) $('concType').value = vals.concType;
-  if (vals.pumpMode !== undefined) $('pumpMode').value = vals.pumpMode;
-  if (vals.filterMode !== undefined) $('filterMode').value = vals.filterMode;
-  if (vals.autMode !== undefined) $('autMode').value = vals.autMode;
-  if (vals.blowerMode !== undefined) $('blowerMode').value = vals.blowerMode;
+  if (vals.eq) for (const [c, mode] of Object.entries(vals.eq)) if ($('eq_' + c)) $('eq_' + c).value = mode;
+  refreshEquipUI();
   updateUI();
 }
 
 const BASELINE = {
-  L: 60, W: 38, lights: 9, lightUnit: 600, spaOn: true, spaL: 7, spaW: 7,
+  L: 60, W: 38, lights: 9, spaOn: true, spaL: 7, spaW: 7,
   depthFac: 1, waterOverride: 0, excavMult: 1, haulLoad: 200, haulMult: 1,
   gravelOn: true, backfillOn: true, gravelMult: 1, fenceOn: true,
   shotcrete: 275, thick: 1, rebar: 0.6, forms: 28, concType: '275',
   tileMat: 8, tileInst: 12, copingMat: 7, copingInst: 12, plaster: 5, plasterGrade: '1',
-  wftOn: true, pumpMode: 'quoted', filterMode: 'quoted', saltOn: true, heaterOn: true,
-  autMode: 'quoted', blowerMode: 'quoted', owner: false,
+  wftOn: true, saltOn: true, heaterOn: true, owner: false,
+  eq: Object.fromEntries(EQUIP.filter(x => x.c).map(x => [x.c, 'quoted'])),
   fee: 'quoted', customFee: 18, permitMode: 'quoted',
   eng: 0, design: 2000, permBldg: 2000, permPlumb: 0, permElec: 900, permDerm: 0, permRunner: 0
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  renderEquipConfig();
+  refreshEquipUI();
   if (typeof Chart === 'undefined') {
     document.querySelector('.charts').innerHTML =
       '<div class="chart-card wide" style="color:var(--warn)">Chart.js CDN failed to load — KPIs still work. Reopen with network once to cache the library.</div>';
@@ -1709,7 +1755,6 @@ document.addEventListener('DOMContentLoaded', () => {
   bindPair('len', 'lenN', 40, 80, 1);
   bindPair('wid', 'widN', 25, 50, 1);
   bindPair('lights', 'lightsN', 0, 12, 1);
-  bindPair('lightUnit', 'lightUnitN', 300, 800, 10);
   bindPair('spaL', 'spaLN', 5, 12, 0.5);
   bindPair('spaW', 'spaWN', 5, 12, 0.5);
   bindPair('depthFac', 'depthFacN', 0.85, 1.2, 0.01);
@@ -1737,8 +1782,7 @@ document.addEventListener('DOMContentLoaded', () => {
   bindPair('permRunner', 'permRunnerN', 0, 2000, 1);
 
   ['spaOn', 'feeModel', 'ownerSupply', 'gravelOn', 'backfillOn', 'fenceOn',
-   'wftOn', 'saltOn', 'heaterOn', 'pumpMode', 'filterMode', 'autMode',
-   'blowerMode', 'permitMode', 'plasterGrade', 'concType'].forEach(id => {
+   'wftOn', 'saltOn', 'heaterOn', 'permitMode', 'plasterGrade', 'concType'].forEach(id => {
     $(id).addEventListener('change', () => {
       if (id === 'ownerSupply') syncOwnerMaster();
       if (id === 'permitMode') applyPermitPreset($('permitMode').value);
@@ -1747,21 +1791,38 @@ document.addEventListener('DOMContentLoaded', () => {
         $('shotcrete').value = v;
         $('shotcreteN').value = v;
       }
-      // if individual equipment changed away from owner, uncheck master
-      if (['pumpMode', 'filterMode', 'autMode', 'blowerMode'].includes(id)) {
-        const allOwner = ['pumpMode', 'filterMode', 'blowerMode', 'autMode']
-          .every(x => $(x).value === 'owner');
-        if (!allOwner) $('ownerSupply').checked = false;
-      }
       updateUI();
     });
+  });
+
+  // Equipment configurator: dropdowns + custom $ (kept while toggling; saved in localStorage)
+  for (const it of EQUIP) {
+    if (!it.c) continue;
+    $('eq_' + it.c).addEventListener('change', () => {
+      refreshEquipUI();
+      syncOwnerMasterCheckbox();
+      updateUI();
+    });
+    $('eqU_' + it.c).addEventListener('input', () => {
+      const v = $('eqU_' + it.c).value;
+      if (v === '' || Number.isNaN(+v)) return;
+      const store = loadCustom();
+      store[it.c] = Math.max(0, +v);
+      saveCustom(store);
+      updateUI();
+    });
+  }
+  $('btnClearCustom').addEventListener('click', () => {
+    try { localStorage.removeItem(EQ_STORE_KEY); } catch (e) { /* ignore */ }
+    for (const it of EQUIP) if (it.c) $('eqU_' + it.c).value = lineByCode(it.c).u;
+    updateUI();
   });
 
   $('btnReset').addEventListener('click', () => setAll(BASELINE));
 
   $('btnRecommend').addEventListener('click', () => setAll({
     L: +$('len').value, W: +$('wid').value,
-    lights: 3, lightUnit: 436,
+    lights: 3,
     spaOn: $('spaOn').checked, spaL: +$('spaL').value, spaW: +$('spaW').value,
     depthFac: 1, waterOverride: +$('waterOverride').value,
     excavMult: 1, haulLoad: 200, haulMult: 1,
@@ -1769,8 +1830,8 @@ document.addEventListener('DOMContentLoaded', () => {
     shotcrete: 220, thick: 1, rebar: 0.6, forms: 20, concType: '220',
     tileMat: 8, tileInst: 12, copingMat: 7, copingInst: 12, plaster: 5, plasterGrade: '1',
     wftOn: $('wftOn').checked,
-    pumpMode: 'owner', filterMode: 'owner', saltOn: true, heaterOn: true,
-    autMode: 'owner', blowerMode: 'owner', owner: true,
+    saltOn: true, heaterOn: true, owner: true,
+    eq: { '11-010': 'owner', '11-020': 'owner', '11-040': 'owner', 'SPA-16': 'owner', 'AUT-01': 'owner' },
     fee: '15', customFee: 15, permitMode: 'actual'
   }));
 

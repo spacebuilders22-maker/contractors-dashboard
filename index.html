@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Contractors Full Cost Dashboard — Stan Ivanov</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg2: #1a2332;
+    --bg3: #243044;
+    --card: #1e2a3a;
+    --border: #2d3f56;
+    --text: #e8eef6;
+    --muted: #8b9cb3;
+    --accent: #3d9cf0;
+    --accent2: #2dd4bf;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --ok: #34d399;
+    --quote: #818cf8;
+    --fair: #2dd4bf;
+    --radius: 10px;
+    --shadow: 0 4px 24px rgba(0,0,0,.35);
+    --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+    --mono: "SF Mono", "Cascadia Code", Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 14.5px; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.45;
+    min-height: 100vh;
+  }
+  .app {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 0;
+    min-height: 100vh;
+  }
+  @media (max-width: 1100px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { position: relative !important; max-height: none; border-right: none; border-bottom: 1px solid var(--border); }
+  }
+
+  .topbar {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #152032 0%, #1a2d45 50%, #0f2840 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 1.1rem 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .topbar h1 {
+    font-size: 1.35rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+  }
+  .topbar .meta {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(61,156,240,.15);
+    color: var(--accent);
+    border: 1px solid rgba(61,156,240,.35);
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .badge.warn {
+    background: rgba(245,158,11,.12);
+    color: var(--warn);
+    border-color: rgba(245,158,11,.35);
+  }
+
+  .sidebar {
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 0.85rem 0.9rem 2rem;
+    position: sticky;
+    top: 0;
+    align-self: start;
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 0 0 0.55rem 0.15rem;
+  }
+  details.acc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+  }
+  details.acc > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 650;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg3);
+    user-select: none;
+  }
+  details.acc > summary::-webkit-details-marker { display: none; }
+  details.acc > summary::after {
+    content: "▸";
+    color: var(--muted);
+    font-size: 0.75rem;
+    transition: transform .15s;
+  }
+  details.acc[open] > summary::after { transform: rotate(90deg); }
+  details.acc .acc-body {
+    padding: 0.7rem 0.75rem 0.85rem;
+  }
+  .param { margin-bottom: 0.75rem; }
+  .param label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.78rem;
+    margin-bottom: 0.25rem;
+    color: var(--text);
+  }
+  .param label .hint {
+    color: var(--muted);
+    font-size: 0.68rem;
+    font-weight: 400;
+  }
+  .param .row {
+    display: grid;
+    grid-template-columns: 1fr 68px;
+    gap: 0.4rem;
+    align-items: center;
+  }
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+    height: 1.15rem;
+  }
+  input[type="number"], select {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 0.32rem 0.4rem;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+  }
+  select { cursor: pointer; }
+  input[type="number"]:focus, select:focus {
+    outline: 2px solid rgba(61,156,240,.45);
+    border-color: var(--accent);
+  }
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.45rem 0.55rem;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 0.45rem;
+    font-size: 0.78rem;
+  }
+  .toggle-row input[type="checkbox"] {
+    width: 1.05rem;
+    height: 1.05rem;
+    accent-color: var(--accent2);
+    flex-shrink: 0;
+  }
+  .toggle-row .hint {
+    color: var(--muted);
+    font-size: 0.68rem;
+  }
+  .scale-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0.35rem 0 0.55rem;
+  }
+  .pill {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.25rem 0.45rem;
+    font-size: 0.68rem;
+    font-family: var(--mono);
+    color: var(--accent2);
+  }
+  .pill span { color: var(--muted); }
+  .btn-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+  }
+  button.btn {
+    appearance: none;
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+  }
+  button.btn:hover { background: #2a3d55; border-color: var(--accent); }
+  button.btn.primary {
+    background: linear-gradient(135deg, #2563eb, #0ea5e9);
+    border-color: transparent;
+    color: #fff;
+  }
+  button.btn.primary:hover { filter: brightness(1.08); }
+
+  .main {
+    padding: 1.1rem 1.25rem 2.5rem;
+    background: var(--bg);
+  }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.65rem;
+    margin-bottom: 1rem;
+  }
+  .kpi {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.75rem 0.85rem;
+    box-shadow: var(--shadow);
+  }
+  .kpi .label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
+  }
+  .kpi .value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .kpi .sub {
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+  .kpi.save .value { color: var(--ok); }
+  .kpi.bill .value { color: var(--accent); }
+  .kpi.fair .value { color: var(--fair); }
+  .kpi.quote .value { color: var(--quote); }
+
+  .charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
+  @media (max-width: 800px) {
+    .charts { grid-template-columns: 1fr; }
+  }
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.95rem;
+    box-shadow: var(--shadow);
+  }
+  .chart-card.wide { grid-column: 1 / -1; }
+  .chart-card h3 {
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 0.55rem;
+  }
+  .chart-wrap { position: relative; height: 260px; }
+  .chart-wrap.tall { height: 300px; }
+
+  .savings-card, .notes-card, .model-notes {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.1rem;
+    margin-bottom: 0.8rem;
+    box-shadow: var(--shadow);
+  }
+  .savings-card h3, .notes-card h3 {
+    font-size: 0.88rem;
+    margin-bottom: 0.55rem;
+  }
+  .savings-list { list-style: none; }
+  .savings-list li {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    gap: 0.45rem;
+    align-items: start;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid rgba(45,63,86,.6);
+    font-size: 0.78rem;
+  }
+  .savings-list li:last-child { border-bottom: none; }
+  .savings-list .rank {
+    color: var(--warn);
+    font-weight: 700;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+  }
+  .savings-list .amt {
+    font-family: var(--mono);
+    color: var(--ok);
+    white-space: nowrap;
+    font-size: 0.75rem;
+  }
+  .fixed-scaled {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+    font-size: 0.78rem;
+  }
+  @media (max-width: 600px) {
+    .fixed-scaled { grid-template-columns: 1fr; }
+  }
+  .fixed-scaled h4 {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
+  }
+  .fixed-scaled ul { padding-left: 1.05rem; color: var(--muted); }
+  .fixed-scaled li { margin-bottom: 0.15rem; }
+
+  details.model-notes { cursor: pointer; }
+  details.model-notes summary {
+    font-weight: 600;
+    font-size: 0.88rem;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  details.model-notes summary::after {
+    content: "▸";
+    color: var(--muted);
+    transition: transform .15s;
+  }
+  details.model-notes[open] summary::after { transform: rotate(90deg); }
+  details.model-notes .body {
+    margin-top: 0.7rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  details.model-notes .body p { margin-bottom: 0.45rem; }
+  details.model-notes .body code {
+    font-family: var(--mono);
+    background: var(--bg3);
+    padding: 0.08rem 0.28rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    color: var(--accent2);
+  }
+  details.model-notes table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.45rem 0;
+    font-size: 0.72rem;
+  }
+  details.model-notes th, details.model-notes td {
+    border: 1px solid var(--border);
+    padding: 0.28rem 0.4rem;
+    text-align: left;
+  }
+  details.model-notes th { background: var(--bg3); color: var(--text); }
+
+  footer.disclaimer {
+    margin-top: 1.1rem;
+    padding: 0.8rem 1rem;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    font-size: 0.7rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  #customFeeWrap { display: none; }
+
+  /* Keep v1 layout feel: left dials always visible as sections, main charts + savings below */
+  .sidebar {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding-bottom: 2rem;
+  }
+  .acc {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 0.65rem;
+    background: rgba(255,255,255,0.02);
+  }
+  .acc > summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 0.55rem 0.7rem;
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    border-bottom: 1px solid transparent;
+  }
+  .acc[open] > summary {
+    border-bottom-color: var(--border);
+  }
+  .acc > summary::-webkit-details-marker { display: none; }
+  .acc > summary::after {
+    content: "▾";
+    float: right;
+    opacity: 0.55;
+    font-size: 0.7rem;
+  }
+  .acc:not([open]) > summary::after { content: "▸"; }
+  .acc-body {
+    padding: 0.55rem 0.7rem 0.75rem;
+  }
+  .main {
+    min-width: 0;
+  }
+  .charts {
+    margin-bottom: 1rem;
+  }
+  .savings-card {
+    margin-top: 0.25rem;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div>
+      <h1>Contractors Full Cost Dashboard</h1>
+      <div class="meta">
+        Stan Ivanov · 14224 NW 1st Ave · planning tool
+      </div>
+    </div>
+    <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center">
+      <span class="badge">Interactive — not a bid</span>
+      <span class="badge warn">Open-book cost-plus planning</span>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <div class="sidebar-title">Parameters</div>
+
+    <!-- A. Pool geometry -->
+    <details class="acc" open>
+      <summary>A · Pool geometry</summary>
+      <div class="acc-body">
+        <div class="param">
+          <label>Length (ft) <span class="hint">40–80</span></label>
+          <div class="row">
+            <input type="range" id="len" min="40" max="80" step="1" value="60" />
+            <input type="number" id="lenN" min="40" max="80" step="1" value="60" />
+          </div>
+        </div>
+        <div class="param">
+          <label>Width (ft) <span class="hint">25–50</span></label>
+          <div class="row">
+            <input type="range" id="wid" min="25" max="50" step="1" value="38" />
+            <input type="number" id="widN" min="25" max="50" step="1" value="38" />
+          </div>
+        </div>
+        <div class="toggle-row">
+          <span>Include spa</span>
+          <input type="checkbox" id="spaOn" checked />
+        </div>
+        <div id="spaParams">
+          <div class="param">
+            <label>Spa length (ft)</label>
+            <div class="row">
+              <input type="range" id="spaL" min="5" max="12" step="0.5" value="7" />
+              <input type="number" id="spaLN" min="5" max="12" step="0.5" value="7" />
+            </div>
+          </div>
+          <div class="param">
+            <label>Spa width (ft)</label>
+            <div class="row">
+              <input type="range" id="spaW" min="5" max="12" step="0.5" value="7" />
+              <input type="number" id="spaWN" min="5" max="12" step="0.5" value="7" />
+            </div>
+          </div>
+        </div>
+        <div class="param">
+          <label>Avg depth factor <span class="hint">0.85–1.2 · vol≈area×depth</span></label>
+          <div class="row">
+            <input type="range" id="depthFac" min="0.85" max="1.2" step="0.01" value="1.00" />
+            <input type="number" id="depthFacN" min="0.85" max="1.2" step="0.01" value="1.00" />
+          </div>
+        </div>
+        <div class="param">
+          <label>Water SF override <span class="hint">0 = auto</span></label>
+          <div class="row">
+            <input type="range" id="waterOverride" min="0" max="3500" step="10" value="0" />
+            <input type="number" id="waterOverrideN" min="0" max="3500" step="10" value="0" />
+          </div>
+        </div>
+        <div class="scale-pills">
+          <div class="pill"><span>area </span><strong id="sArea">1.000</strong></div>
+          <div class="pill"><span>peri </span><strong id="sPeri">1.000</strong></div>
+          <div class="pill"><span>water </span><strong id="waterSF">1,580</strong> SF</div>
+        </div>
+      </div>
+    </details>
+
+    <!-- B. Site work -->
+    <details class="acc" open>
+      <summary>B · Site work</summary>
+      <div class="acc-body">
+        <div class="param">
+          <label>Excavation intensity <span class="hint">0.8–1.4 · 04-* Area</span></label>
+          <div class="row">
+            <input type="range" id="excavMult" min="0.8" max="1.4" step="0.05" value="1.00" />
+            <input type="number" id="excavMultN" min="0.8" max="1.4" step="0.05" value="1.00" />
+          </div>
+        </div>
+        <div class="param">
+          <label>Haul-off $/load <span class="hint">quoted 200</span></label>
+          <div class="row">
+            <input type="range" id="haulLoad" min="120" max="350" step="5" value="200" />
+            <input type="number" id="haulLoadN" min="120" max="350" step="5" value="200" />
+          </div>
+        </div>
+        <div class="param">
+          <label>Haul-off multiplier <span class="hint">qty × this</span></label>
+          <div class="row">
+            <input type="range" id="haulMult" min="0.5" max="1.5" step="0.05" value="1.00" />
+            <input type="number" id="haulMultN" min="0.5" max="1.5" step="0.05" value="1.00" />
+          </div>
+        </div>
+        <div class="toggle-row">
+          <span>Include gravel (04-080)</span>
+          <input type="checkbox" id="gravelOn" checked />
+        </div>
+        <div class="toggle-row">
+          <span>Include backfill (04-060)</span>
+          <input type="checkbox" id="backfillOn" checked />
+        </div>
+        <div class="param">
+          <label>Gravel / backfill mult <span class="hint">when included</span></label>
+          <div class="row">
+            <input type="range" id="gravelMult" min="0.5" max="1.5" step="0.05" value="1.00" />
+            <input type="number" id="gravelMultN" min="0.5" max="1.5" step="0.05" value="1.00" />
+          </div>
+        </div>
+        <div class="toggle-row">
+          <span>Temp fence (03-010)</span>
+          <input type="checkbox" id="fenceOn" checked />
+        </div>
+      </div>
+    </details>
+
+    <!-- C. Shell -->
+    <details class="acc" open>
+      <summary>C · Shell &amp; structure</summary>
+      <div class="acc-body">
+        <div class="param">
+          <label>Concrete type</label>
+          <select id="concType">
+            <option value="220">Standard shotcrete ($220/CY)</option>
+            <option value="275" selected>Premium ($275/CY)</option>
+            <option value="320">Lightweight ($320/CY)</option>
+          </select>
+        </div>
+        <div class="param">
+          <label>Shotcrete $/CY <span class="hint">editable</span></label>
+          <div class="row">
+            <input type="range" id="shotcrete" min="180" max="350" step="5" value="275" />
+            <input type="number" id="shotcreteN" min="180" max="350" step="5" value="275" />
+          </div>
+        </div>
+        <div class="param">
+          <label>Shell thickness factor <span class="hint">1.0 = engineer baseline</span></label>
+          <div class="row">
+            <input type="range" id="thick" min="0.85" max="1.25" step="0.01" value="1.00" />
+            <input type="number" id="thickN" min="0.85" max="1.25" step="0.01" value="1.00" />
+          </div>
+        </div>
+        <div class="param">
+          <label>Rebar $/lb <span class="hint">quoted 0.60</span></label>
+          <div class="row">
+            <input type="range" id="rebar" min="0.40" max="1.00" step="0.01" value="0.60" />
+            <input type="number" id="rebarN" min="0.40" max="1.00" step="0.01" value="0.60" />
+          </div>
+        </div>
+        <div class="param">
+          <label>Forms $/LF <span class="hint">quoted 28 · fair ~20</span></label>
+          <div class="row">
+            <input type="range" id="forms" min="12" max="35" step="1" value="28" />
+            <input type="number" id="formsN" min="12" max="35" step="1" value="28" />
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- D. Finish -->
+    <details class="acc" open>
+      <summary>D · Finish</summary>
+      <div class="acc-body">
+        <div class="param">
+          <label>Waterline tile $/LF mat <span class="hint">default 8</span></label>
+          <div class="row">
+            <input type="range" id="tileMat" min="4" max="20" step="0.5" value="8" />
+            <input type="number" id="tileMatN" min="4" max="20" step="0.5" value="8" />
+          </div>
+        </div>
+        <div class="param">
+          <label>Tile install $/LF <span class="hint">default 12</span></label>
+          <div class="row">
+            <input type="range" id="tileInst" min="6" max="25" step="0.5" value="12" />
+            <input type="number" id="tileInstN" min="6" max="25" step="0.5" value="12" />
+          </div>
+        </div>
+        <div class="param">
+          <label>Coping material $/LF <span class="hint">default 7</span></label>
+          <div class="row">
+            <input type="range" id="copingMat" min="3" max="18" step="0.5" value="7" />
+            <input type="number" id="copingMatN" min="3" max="18" step="0.5" value="7" />
+          </div>
+        </div>
+        <div class="param">
+          <label>Coping install $/LF <span class="hint">default 12</span></label>
+          <div class="row">
+            <input type="range" id="copingInst" min="6" max="25" step="0.5" value="12" />
+            <input type="number" id="copingInstN" min="6" max="25" step="0.5" value="12" />
+          </div>
+        </div>
+        <div class="param">
+          <label>Finish grade</label>
+          <select id="plasterGrade">
+            <option value="1" selected>Standard Diamond Brite</option>
+            <option value="1.25">Upgrade (×1.25)</option>
+            <option value="1.55">Premium (×1.55)</option>
+          </select>
+        </div>
+        <div class="param">
+          <label>Plaster $/SF <span class="hint">base before grade</span></label>
+          <div class="row">
+            <input type="range" id="plaster" min="3" max="12" step="0.25" value="5" />
+            <input type="number" id="plasterN" min="3" max="12" step="0.25" value="5" />
+          </div>
+        </div>
+        <div class="toggle-row">
+          <span>Stepping stones (WFT-01/02)</span>
+          <input type="checkbox" id="wftOn" checked />
+        </div>
+      </div>
+    </details>
+
+    <!-- E. Equipment -->
+    <details class="acc" open>
+      <summary>E · Equipment</summary>
+      <div class="acc-body">
+        <div class="param">
+          <label>LED lights qty <span class="hint">recommended 3</span></label>
+          <div class="row">
+            <input type="range" id="lights" min="0" max="12" step="1" value="9" />
+            <input type="number" id="lightsN" min="0" max="12" step="1" value="9" />
+          </div>
+        </div>
+        <div class="param">
+          <label>Light unit $ installed <span class="hint">default 600</span></label>
+          <div class="row">
+            <input type="range" id="lightUnit" min="300" max="800" step="10" value="600" />
+            <input type="number" id="lightUnitN" min="300" max="800" step="10" value="600" />
+          </div>
+        </div>
+        <div class="param">
+          <label>Pump package</label>
+          <select id="pumpMode">
+            <option value="quoted" selected>Quoted</option>
+            <option value="owner">Owner-supply Stan</option>
+            <option value="none">None</option>
+          </select>
+        </div>
+        <div class="param">
+          <label>Filter</label>
+          <select id="filterMode">
+            <option value="quoted" selected>Quoted</option>
+            <option value="owner">Owner-supply</option>
+            <option value="none">None</option>
+          </select>
+        </div>
+        <div class="toggle-row">
+          <span>Salt system include</span>
+          <input type="checkbox" id="saltOn" checked />
+        </div>
+        <div class="toggle-row">
+          <span>Heater include (HTR-*)</span>
+          <input type="checkbox" id="heaterOn" checked />
+        </div>
+        <div class="param">
+          <label>Automation</label>
+          <select id="autMode">
+            <option value="quoted" selected>Quoted $2,800</option>
+            <option value="owner">Owner AquaLink credit</option>
+            <option value="none">None</option>
+          </select>
+        </div>
+        <div class="param">
+          <label>Blower</label>
+          <select id="blowerMode">
+            <option value="quoted" selected>Quoted</option>
+            <option value="owner">Owner-supply</option>
+            <option value="none">None</option>
+          </select>
+        </div>
+        <div class="toggle-row">
+          <span>Owner-supply master<br/><span class="hint">pump / filter / blower / AUT credit</span></span>
+          <input type="checkbox" id="ownerSupply" />
+        </div>
+      </div>
+    </details>
+
+    <!-- F. Commercial -->
+    <details class="acc" open>
+      <summary>F · Commercial</summary>
+      <div class="acc-body">
+        <div class="param">
+          <label>Fee model</label>
+          <select id="feeModel">
+            <option value="quoted" selected>Quoted stacked ×1.3158</option>
+            <option value="15">Fair 15%</option>
+            <option value="12">Fair 12%</option>
+            <option value="custom">Custom fee %</option>
+          </select>
+        </div>
+        <div class="param" id="customFeeWrap">
+          <label>Custom fee % <span class="hint">10–35</span></label>
+          <div class="row">
+            <input type="range" id="customFee" min="10" max="35" step="0.5" value="18" />
+            <input type="number" id="customFeeN" min="10" max="35" step="0.5" value="18" />
+          </div>
+        </div>
+        <div class="param">
+          <label>Building / electrical permits</label>
+          <select id="permitMode">
+            <option value="quoted" selected>Quoted (allowance)</option>
+            <option value="actual">Actual Miami-Dade fees</option>
+          </select>
+        </div>
+      </div>
+    </details>
+
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="btnRecommend">Apply recommended</button>
+      <button type="button" class="btn" id="btnReset">Reset to baseline</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="kpi-grid">
+      <div class="kpi quote">
+        <div class="label">Contractor Direct</div>
+        <div class="value" id="kDirect">—</div>
+        <div class="sub">Ext cost before markup</div>
+      </div>
+      <div class="kpi fair">
+        <div class="label">Fair Mid Direct</div>
+        <div class="value" id="kFair">—</div>
+        <div class="sub">Approx local mid</div>
+      </div>
+      <div class="kpi bill">
+        <div class="label">Billed Total</div>
+        <div class="value" id="kBilled">—</div>
+        <div class="sub" id="kFeeLabel">under selected fee</div>
+      </div>
+      <div class="kpi save">
+        <div class="label">Savings vs Baseline</div>
+        <div class="value" id="kSave">—</div>
+        <div class="sub">vs quoted billed $152,330</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Equipment</div>
+        <div class="value" id="kEquip" style="font-size:1.05rem">—</div>
+        <div class="sub">pump, filter, lights, heater…</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Shell</div>
+        <div class="value" id="kShell" style="font-size:1.05rem">—</div>
+        <div class="sub">forms, rebar, shotcrete</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Finish</div>
+        <div class="value" id="kFinish" style="font-size:1.05rem">—</div>
+        <div class="sub">tile, coping, plaster, startup</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Site work</div>
+        <div class="value" id="kSite" style="font-size:1.05rem">—</div>
+        <div class="sub">excavate, haul, fence…</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Plumbing + Electrical</div>
+        <div class="value" id="kPlumb" style="font-size:1.05rem">—</div>
+        <div class="sub">rough + package</div>
+      </div>
+    </div>
+
+    <div class="charts">
+      <div class="chart-card">
+        <h3>Cost by category (contractor direct)</h3>
+        <div class="chart-wrap"><canvas id="pieCat"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3 id="pieFeeTitle">Direct vs Fee</h3>
+        <div class="chart-wrap"><canvas id="pieFee"></canvas></div>
+      </div>
+      <div class="chart-card wide">
+        <h3>Quoted vs Fair Mid by category</h3>
+        <div class="chart-wrap tall"><canvas id="barCat"></canvas></div>
+      </div>
+    </div>
+
+    <div class="savings-card">
+      <h3>Top savings at current parameters</h3>
+      <ul class="savings-list" id="savingsList"></ul>
+    </div>
+
+    <div class="notes-card">
+      <h3>Fixed vs Scaled</h3>
+      <div class="fixed-scaled">
+        <div>
+          <h4>Scales with area × depth</h4>
+          <ul>
+            <li>Excavation, haul-off, backfill, gravel</li>
+            <li>Rebar, shotcrete, plaster</li>
+          </ul>
+          <h4 style="margin-top:.55rem">Scales with perimeter</h4>
+          <ul>
+            <li>Forms, tile, coping, temp fence</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Fixed (does not scale)</h4>
+          <ul>
+            <li>Equipment (pump, filter, salt, lights qty, heater, automation, blower)</li>
+            <li>Permits, design, plumbing lumps, electrical package</li>
+            <li>Pads count, spa adders (except spa shell L×W)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <details class="model-notes">
+      <summary>Model notes &amp; assumptions</summary>
+      <div class="body">
+        <p>Embedded cost model from contractor Quote <code>#26072701</code> and local Miami rate audit spreadsheet
+        (59 line items). Quote/model numbers kept here for validation only.</p>
+        <p><strong>Baseline pool:</strong> 60×38 ft, water SF ≈ 1,580. Spa 7×7 separate.
+        Scaled Quoted Direct ≈ <code>$115,771</code> → quoted billed ≈ <code>$152,330</code>
+        (stacked fee ×1.3158, thickness 1.0, 9 lights, no owner-supply).</p>
+        <p><strong>Markup (quoted stacked):</strong> GC 5% as gross margin (<code>Direct / 0.95</code>) then Fee 20% as gross margin
+        (<code>/ 0.80</code>) → effective multiplier <code>×1.3158</code>.
+        Fair models apply a single fee of 15% or 12% (or custom 10–35%) on direct.</p>
+        <p><strong>Shell thickness factor:</strong> multiplies shotcrete CY (<code>06-010</code>, spa shotcrete) and rebar qty
+        (<code>05-020</code>, <code>SPA-04</code>). When factor &gt; 1.0, forms LF get a small bump:
+        <code>×(1 + 0.12×(factor−1))</code>.</p>
+        <p><strong>Site work:</strong> excavation intensity multiplies Area <code>04-*</code> lines only.
+        Haul-off unit $/load and multiplier override <code>04-050</code>. Gravel/backfill toggles zero those lines when off.
+        Temp fence toggles <code>03-010</code>.</p>
+        <p><strong>Depth / water SF:</strong> avg depth factor scales Area basis (volume proxy). Water SF override replaces
+        auto water SF display and rescales Area vs baseline water SF when set &gt; 0.</p>
+        <p><strong>Lights:</strong> quantity × unit $ (default 9 × $600). Recommend 3. Owner-supply master sets unit to $436.</p>
+        <p><strong>Owner-supply (Stan MT Pool):</strong> pump <code>$1,491.30</code>, filter <code>$1,151.41</code>,
+        blower <code>$240.42</code>, AUT credit <code>$0</code> (saves $2,800 quoted AquaLink).</p>
+        <p><strong>Fair mid:</strong> audit Fair Mid baselines × same scale factors; shotcrete fair $220/CY; forms fair $20/LF
+        (quoted bars use your sliders).</p>
+        <p><strong>Permits:</strong> Quoted uses line allowances; Actual Miami-Dade uses published ~$800 building / ~$149 electrical.</p>
+        <table>
+          <tr><th>Validation</th><th>Scaled Quoted Direct</th><th>Equipment</th></tr>
+          <tr><td>Baseline 60×38</td><td>≈ $115,771</td><td>≈ $22,428.52</td></tr>
+          <tr><td>Example 50×32</td><td>≈ $98,120</td><td>$22,428.52 (unchanged)</td></tr>
+        </table>
+        <p>Chart.js from CDN (needs network once). After cache, <code>file://</code> works offline.</p>
+      </div>
+    </details>
+
+    <footer class="disclaimer">
+      Estimates for planning only. Reflects open-book cost-plus discussion against contractor Quote #26072701 and a local Miami rate audit (2026-10-06).
+      Not a contractor bid, not legal advice, and not a substitute for Miami-Dade permits or FL Residential Pool Safety Act barrier compliance.
+      Hidden $0 scope (plumbing permit, DERM, barrier, deck) may still apply.
+    </footer>
+  </main>
+</div>
+
+<script>
+const LINES = [{"c":"01-010","n":"Blueprints \u2013 standard pool","s":"01 Design & Engineering","q":1.0,"u":2000.0,"b":"Fixed","f":1150.0},{"c":"01-020","n":"Permit runner / expediting","s":"01 Design & Engineering","q":1.0,"u":0.0,"b":"Fixed","f":750.0},{"c":"02-010","n":"Building permit","s":"02 Permits","q":1.0,"u":2000.0,"b":"Fixed","f":800.0},{"c":"02-020","n":"Plumbing permit","s":"02 Permits","q":1.0,"u":0.0,"b":"Fixed","f":125.0},{"c":"02-030","n":"Electrical permit","s":"02 Permits","q":1.0,"u":900.0,"b":"Fixed","f":149.0},{"c":"02-040","n":"DERM / zoning allowance","s":"02 Permits","q":1.0,"u":0.0,"b":"Fixed","f":500.0},{"c":"03-010","n":"Temp safety + silt fencing","s":"03 Site Prep","q":238.0,"u":3.0,"b":"Perimeter","f":1190.0},{"c":"04-010","n":"Excavation \u2013 dig & load","s":"04 Excavation & Hauling","q":1580.0,"u":4.5,"b":"Area","f":5925.0},{"c":"04-050","n":"Dirt haul-off","s":"04 Excavation & Hauling","q":17.0,"u":200.0,"b":"Area","f":8075.0},{"c":"04-060","n":"Backfill & rough grading","s":"04 Excavation & Hauling","q":3.0,"u":700.0,"b":"Area","f":2250.0},{"c":"04-070","n":"Compaction","s":"04 Excavation & Hauling","q":1.0,"u":500.0,"b":"Fixed","f":550.0},{"c":"04-080","n":"Gravel","s":"04 Excavation & Hauling","q":2.0,"u":650.0,"b":"Area","f":2900.0},{"c":"05-010","n":"Forms \u2013 pool (sub)","s":"05 Forms & Rebar","q":218.0,"u":28.0,"b":"Perimeter","f":4033.0},{"c":"05-020","n":"Rebar material \u2013 pool","s":"05 Forms & Rebar","q":6776.04,"u":0.6,"b":"Area","f":3896.0},{"c":"05-030","n":"Steps & sunshelf forming","s":"05 Forms & Rebar","q":1.0,"u":1000.0,"b":"Fixed","f":1125.0},{"c":"06-010","n":"Shotcrete ALL-IN \u2013 pool","s":"06 Shotcrete Shell","q":78.46,"u":275.0,"b":"Area","f":16869.0},{"c":"07-010","n":"Pool plumbing rough & pressure test","s":"07 Plumbing","q":1.0,"u":2000.0,"b":"Fixed","f":2250.0},{"c":"07-020","n":"Main drain \u2013 pool","s":"07 Plumbing","q":1.0,"u":125.0,"b":"Fixed","f":115.0},{"c":"07-030","n":"Sunshelf plumbing","s":"07 Plumbing","q":2.0,"u":150.0,"b":"Fixed","f":300.0},{"c":"07-040","n":"Trench \u2013 equipment run","s":"07 Plumbing","q":1.0,"u":1000.0,"b":"Fixed","f":1000.0},{"c":"07-050","n":"Additional lines up to 3\"","s":"07 Plumbing","q":6.0,"u":100.0,"b":"Fixed","f":540.0},{"c":"07-060","n":"Additional valves / actuators","s":"07 Plumbing","q":6.0,"u":75.0,"b":"Fixed","f":600.0},{"c":"08-010","n":"Pool electrical package","s":"08 Electrical","q":1.0,"u":4000.0,"b":"Fixed","f":3500.0},{"c":"08-020","n":"Salt system hook-up","s":"08 Electrical","q":1.0,"u":100.0,"b":"Fixed","f":137.5},{"c":"08-030","n":"Heater-ready provision","s":"08 Electrical","q":1.0,"u":100.0,"b":"Fixed","f":162.5},{"c":"09-010","n":"Tile material \u2013 pool","s":"09 Tile & Coping","q":332.2,"u":8.0,"b":"Perimeter","f":2824.0},{"c":"09-020","n":"Tile install \u2013 pool","s":"09 Tile & Coping","q":302.0,"u":12.0,"b":"Perimeter","f":4530.0},{"c":"09-030","n":"Coping material \u2013 pool","s":"09 Tile & Coping","q":235.4,"u":7.0,"b":"Perimeter","f":1648.0},{"c":"09-040","n":"Coping install \u2013 pool","s":"09 Tile & Coping","q":214.0,"u":12.0,"b":"Perimeter","f":3210.0},{"c":"10-010","n":"Plaster \u2013 pool (sub incl. material)","s":"10 Plaster & Startup","q":2030.79,"u":5.0,"b":"Area","f":13200.0},{"c":"10-030","n":"Pool startup & chemicals (1 week)","s":"10 Plaster & Startup","q":1.0,"u":500.0,"b":"Fixed","f":550.0},{"c":"11-010","n":"Pump \u2013 IntelliFlo3 VSF","s":"11 Equipment","q":1.0,"u":1978.52,"b":"Fixed","f":1869.0},{"c":"11-020","n":"Filter \u2013 CCP 420","s":"11 Equipment","q":1.0,"u":1900.0,"b":"Fixed","f":1510.0},{"c":"11-030","n":"Salt system \u2013 IntelliChlor+ 40k","s":"11 Equipment","q":1.0,"u":1900.0,"b":"Fixed","f":2175.0},{"c":"11-040","n":"Pool lights (LED, installed)","s":"11 Equipment","q":9.0,"u":600.0,"b":"Fixed","f":1650.0},{"c":"11-050","n":"White goods & misc allowance","s":"11 Equipment","q":1.0,"u":700.0,"b":"Fixed","f":600.0},{"c":"11-060","n":"Equipment install labor \u2013 pool","s":"11 Equipment","q":1.0,"u":900.0,"b":"Fixed","f":1125.0},{"c":"SPA-02","n":"Forms \u2013 spa (sub)","s":"OPT \u2013 Spa","q":32.0,"u":28.0,"b":"SpaPerimeter","f":640.0},{"c":"SPA-03","n":"Spa form adder (raised walls)","s":"OPT \u2013 Spa","q":1.0,"u":1500.0,"b":"Fixed","f":1500.0},{"c":"SPA-04","n":"Rebar material \u2013 spa","s":"OPT \u2013 Spa","q":328.94,"u":0.6,"b":"SpaArea","f":189.0},{"c":"SPA-05","n":"Shotcrete ALL-IN \u2013 spa","s":"OPT \u2013 Spa","q":4.29,"u":300.0,"b":"SpaArea","f":944.0},{"c":"SPA-06","n":"Spa plumbing adder","s":"OPT \u2013 Spa","q":1.0,"u":700.0,"b":"Fixed","f":750.0},{"c":"SPA-07","n":"Spa jet pre-plumb (up to 6 jets)","s":"OPT \u2013 Spa","q":1.0,"u":750.0,"b":"Fixed","f":750.0},{"c":"SPA-09","n":"Main drain \u2013 spa","s":"OPT \u2013 Spa","q":1.0,"u":125.0,"b":"Fixed","f":115.0},{"c":"SPA-10","n":"Spa electrical adder","s":"OPT \u2013 Spa","q":1.0,"u":750.0,"b":"Fixed","f":600.0},{"c":"SPA-11","n":"Tile material \u2013 spa","s":"OPT \u2013 Spa","q":44.0,"u":8.0,"b":"SpaPerimeter","f":374.0},{"c":"SPA-12","n":"Tile install \u2013 spa","s":"OPT \u2013 Spa","q":40.0,"u":12.0,"b":"SpaPerimeter","f":600.0},{"c":"SPA-13","n":"Coping material \u2013 spa","s":"OPT \u2013 Spa","q":30.8,"u":7.0,"b":"SpaPerimeter","f":216.0},{"c":"SPA-14","n":"Coping install \u2013 spa","s":"OPT \u2013 Spa","q":28.0,"u":12.0,"b":"SpaPerimeter","f":420.0},{"c":"SPA-15","n":"Plaster \u2013 spa (sub incl. material)","s":"OPT \u2013 Spa","q":147.0,"u":5.5,"b":"SpaArea","f":956.0},{"c":"SPA-16","n":"Spa blower (unit + install)","s":"OPT \u2013 Spa","q":1.0,"u":300.0,"b":"Fixed","f":300.0},{"c":"SPA-17","n":"Equipment install adder \u2013 spa","s":"OPT \u2013 Spa","q":1.0,"u":200.0,"b":"Fixed","f":250.0},{"c":"HTR-02","n":"Heater \u2013 UltraTemp 140","s":"OPT \u2013 Heater","q":1.0,"u":5800.0,"b":"Fixed","f":5948.0},{"c":"HTR-03","n":"Heater install (set & plumb)","s":"OPT \u2013 Heater","q":1.0,"u":0.0,"b":"Fixed","f":800.0},{"c":"HTR-04","n":"Heater electrical (breaker + wire)","s":"OPT \u2013 Heater","q":1.0,"u":350.0,"b":"Fixed","f":425.0},{"c":"AUT-01","n":"Automation package (unit + install)","s":"OPT \u2013 Automation","q":1.0,"u":2800.0,"b":"Fixed","f":0.0},{"c":"WFT-01","n":"Stepping stones \u2013 shotcrete, rebar & finish (5 pads)","s":"OPT \u2013 Water Features","q":1.0,"u":1048.85,"b":"Fixed","f":1050.0},{"c":"WFT-02","n":"Stepping stones \u2013 forming & shaping labor","s":"OPT \u2013 Water Features","q":1.0,"u":1500.0,"b":"Fixed","f":900.0},{"c":"BAR-01","n":"Baby fence (Redpro) \u2014 FL required","s":"OPT \u2013 Barrier","q":0.0,"u":12.2,"b":"Perimeter","f":1700.0}];
+
+const BASE = { L: 60, W: 38, spaL: 7, spaW: 7, waterSF: 1580, markup: 1.3158, baselineBilled: 152330 };
+const CAT_ORDER = [
+  'Design & Permits',
+  'Site work',
+  'Shell',
+  'Plumbing & Electrical',
+  'Finish',
+  'Equipment',
+  'Spa',
+  'Other'
+];
+const CAT_COLORS = [
+  '#818cf8', '#f59e0b', '#ef4444', '#3d9cf0',
+  '#a78bfa', '#2dd4bf', '#fb7185', '#64748b'
+];
+
+function $(id) { return document.getElementById(id); }
+function money(n) {
+  const neg = n < 0;
+  const a = Math.abs(Math.round(n));
+  return (neg ? '-$' : '$') + a.toLocaleString('en-US');
+}
+function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+
+function categorize(code) {
+  if (code.startsWith('01') || code.startsWith('02')) return 'Design & Permits';
+  if (code.startsWith('03') || code.startsWith('04')) return 'Site work';
+  if (code.startsWith('05') || code.startsWith('06')) return 'Shell';
+  if (code.startsWith('07') || code.startsWith('08')) return 'Plumbing & Electrical';
+  if (code.startsWith('09') || code.startsWith('10')) return 'Finish';
+  if (code.startsWith('11') || code.startsWith('HTR') || code.startsWith('AUT') ||
+      code === 'SPA-16' || code === 'SPA-17') return 'Equipment';
+  if (code.startsWith('SPA')) return 'Spa';
+  return 'Other';
+}
+
+function isEquip(code) {
+  return code.startsWith('11') ||
+    code === 'SPA-16' || code === 'SPA-17' ||
+    code === 'HTR-02' || code === 'HTR-03' || code === 'HTR-04' ||
+    code === 'AUT-01' || code === '08-020' || code === '08-030';
+}
+function isShell(code) {
+  return code.startsWith('05') || code.startsWith('06');
+}
+function isFinish(code) {
+  return code.startsWith('09') || code.startsWith('10');
+}
+function isSite(code) {
+  return code.startsWith('03') || code.startsWith('04');
+}
+function isPlumbElec(code) {
+  return code.startsWith('07') || code.startsWith('08');
+}
+
+function getParams() {
+  return {
+    L: +$('len').value,
+    W: +$('wid').value,
+    lights: +$('lights').value,
+    lightUnit: +$('lightUnit').value,
+    spaOn: $('spaOn').checked,
+    spaL: +$('spaL').value,
+    spaW: +$('spaW').value,
+    depthFac: +$('depthFac').value,
+    waterOverride: +$('waterOverride').value,
+    excavMult: +$('excavMult').value,
+    haulLoad: +$('haulLoad').value,
+    haulMult: +$('haulMult').value,
+    gravelOn: $('gravelOn').checked,
+    backfillOn: $('backfillOn').checked,
+    gravelMult: +$('gravelMult').value,
+    fenceOn: $('fenceOn').checked,
+    shotcrete: +$('shotcrete').value,
+    thick: +$('thick').value,
+    rebar: +$('rebar').value,
+    forms: +$('forms').value,
+    tileMat: +$('tileMat').value,
+    tileInst: +$('tileInst').value,
+    copingMat: +$('copingMat').value,
+    copingInst: +$('copingInst').value,
+    plaster: +$('plaster').value,
+    plasterGrade: +$('plasterGrade').value,
+    wftOn: $('wftOn').checked,
+    pumpMode: $('pumpMode').value,
+    filterMode: $('filterMode').value,
+    saltOn: $('saltOn').checked,
+    heaterOn: $('heaterOn').checked,
+    autMode: $('autMode').value,
+    blowerMode: $('blowerMode').value,
+    owner: $('ownerSupply').checked,
+    fee: $('feeModel').value,
+    customFee: +$('customFee').value,
+    permitMode: $('permitMode').value
+  };
+}
+
+function scaleFor(basis, p, sa, sp) {
+  if (!p.spaOn && (basis === 'SpaArea' || basis === 'SpaPerimeter')) return 0;
+  const ssa = (p.spaL * p.spaW) / (BASE.spaL * BASE.spaW);
+  const ssp = (p.spaL + p.spaW) / (BASE.spaL + BASE.spaW);
+  if (basis === 'Area') return sa;
+  if (basis === 'Perimeter') return sp;
+  if (basis === 'SpaArea') return ssa;
+  if (basis === 'SpaPerimeter') return ssp;
+  return 1;
+}
+
+function compute(p) {
+  const catsI = Object.fromEntries(CAT_ORDER.map(c => [c, 0]));
+  const catsF = Object.fromEntries(CAT_ORDER.map(c => [c, 0]));
+  let quoted = 0, fair = 0, equip = 0, shell = 0, finish = 0, site = 0, plumb = 0;
+
+  let sa = (p.L * p.W) / (BASE.L * BASE.W);
+  const sp = (p.L + p.W) / (BASE.L + BASE.W);
+  // depth factor scales volume-proxy Area items
+  sa = sa * p.depthFac;
+  if (p.waterOverride > 0) {
+    sa = (p.waterOverride / BASE.waterSF) * p.depthFac;
+  }
+  const waterSF = p.waterOverride > 0 ? p.waterOverride : BASE.waterSF * ((p.L * p.W) / (BASE.L * BASE.W));
+
+  const thick = p.thick;
+  const formsBump = thick > 1 ? (1 + 0.12 * (thick - 1)) : 1;
+
+  let shotcreteQuoted = 0, shotcreteFair = 0, formsQuoted = 0, formsFair = 0;
+  let lightsQuoted = 0, permitBldg = 0, permitElec = 0, blueprints = 0;
+  let pumpSave = 0, filterSave = 0, autSave = 0;
+
+  for (const row of LINES) {
+    const code = row.c;
+    if (code.startsWith('SPA') && !p.spaOn) continue;
+    if ((code.startsWith('HTR') || code === '08-030') && !p.heaterOn) continue;
+    if ((code === '11-030' || code === '08-020') && !p.saltOn) continue;
+    if ((code === 'WFT-01' || code === 'WFT-02') && !p.wftOn) continue;
+    if (code === '03-010' && !p.fenceOn) continue;
+    if (code === '04-080' && !p.gravelOn) continue;
+    if (code === '04-060' && !p.backfillOn) continue;
+
+    const sf = scaleFor(row.b, p, sa, sp);
+    let qty = row.q;
+    let unitI = row.u;
+    let extI, extF;
+
+    // Thickness on shotcrete & rebar qty
+    if (code === '06-010' || code === 'SPA-05') qty = qty * thick;
+    if (code === '05-020' || code === 'SPA-04') qty = qty * thick;
+    // Slight forms bump when thicker shell
+    if ((code === '05-010' || code === 'SPA-02') && thick > 1) qty = qty * formsBump;
+
+    // Site work intensity on 04-* Area lines
+    if (code.startsWith('04') && row.b === 'Area') {
+      qty = qty * p.excavMult;
+    }
+    if (code === '04-050') {
+      unitI = p.haulLoad;
+      qty = qty * p.haulMult;
+    }
+    if ((code === '04-060' || code === '04-080') && p.gravelMult !== 1) {
+      qty = qty * p.gravelMult;
+    }
+
+    if (code === '11-040') {
+      qty = p.lights;
+      unitI = p.owner ? 436 : p.lightUnit;
+      extI = qty * unitI;
+      extF = qty * (p.owner ? 436 : Math.min(p.lightUnit, 550));
+      lightsQuoted = extI;
+    } else if (code === '06-010') {
+      unitI = p.shotcrete;
+      extI = qty * sf * unitI;
+      extF = qty * sf * 220;
+      shotcreteQuoted = extI;
+      shotcreteFair = extF;
+    } else if (code === 'SPA-05') {
+      // spa shotcrete keeps its own base unit unless we want shotcrete slider — use ratio of pool slider to 275
+      const spaUnit = row.u * (p.shotcrete / 275);
+      unitI = spaUnit;
+      extI = qty * sf * unitI;
+      extF = qty * sf * (220 * (row.u / 275));
+    } else if (code === '05-010' || code === 'SPA-02') {
+      unitI = p.forms;
+      extI = qty * sf * unitI;
+      extF = qty * sf * 20;
+      formsQuoted += extI;
+      formsFair += extF;
+    } else if (code === '05-020' || code === 'SPA-04') {
+      unitI = p.rebar;
+      extI = qty * sf * unitI;
+      extF = row.f * sf * thick; // fair mid also thickness-scaled qty
+    } else if (code === '09-010' || code === 'SPA-11') {
+      unitI = p.tileMat;
+      extI = qty * sf * unitI;
+      extF = row.f * sf;
+    } else if (code === '09-020' || code === 'SPA-12') {
+      unitI = p.tileInst;
+      extI = qty * sf * unitI;
+      extF = row.f * sf;
+    } else if (code === '09-030' || code === 'SPA-13') {
+      unitI = p.copingMat;
+      extI = qty * sf * unitI;
+      extF = row.f * sf;
+    } else if (code === '09-040' || code === 'SPA-14') {
+      unitI = p.copingInst;
+      extI = qty * sf * unitI;
+      extF = row.f * sf;
+    } else if (code === '10-010') {
+      unitI = p.plaster * p.plasterGrade;
+      extI = qty * sf * unitI;
+      extF = row.f * sf * p.plasterGrade;
+    } else if (code === 'SPA-15') {
+      unitI = row.u * (p.plaster / 5) * p.plasterGrade;
+      extI = qty * sf * unitI;
+      extF = row.f * sf * p.plasterGrade;
+    } else if (code === '11-010') {
+      if (p.pumpMode === 'none') { extI = 0; extF = 0; }
+      else if (p.pumpMode === 'owner') { extI = 1491.30; extF = 1491.30; pumpSave = row.u - 1491.30; }
+      else { extI = qty * sf * unitI; extF = row.f * sf; pumpSave = Math.max(0, extI - 1491.30); }
+    } else if (code === '11-020') {
+      if (p.filterMode === 'none') { extI = 0; extF = 0; }
+      else if (p.filterMode === 'owner') { extI = 1151.41; extF = 1151.41; filterSave = row.u - 1151.41; }
+      else { extI = qty * sf * unitI; extF = row.f * sf; filterSave = Math.max(0, extI - 1151.41); }
+    } else if (code === 'SPA-16') {
+      if (p.blowerMode === 'none') { extI = 0; extF = 0; }
+      else if (p.blowerMode === 'owner') { extI = 240.42; extF = 240.42; }
+      else { extI = qty * sf * unitI; extF = row.f * sf; }
+    } else if (code === 'AUT-01') {
+      if (p.autMode === 'none' || p.autMode === 'owner') {
+        extI = 0; extF = 0;
+        autSave = p.autMode === 'owner' ? 2800 : 0;
+      } else {
+        extI = qty * sf * unitI; extF = row.f * sf; autSave = 2800;
+      }
+    } else if (code === '02-010' && p.permitMode === 'actual') {
+      extI = 800; extF = 800;
+    } else if (code === '02-030' && p.permitMode === 'actual') {
+      extI = 149; extF = 149;
+    } else {
+      extI = qty * sf * unitI;
+      extF = row.f * sf;
+    }
+
+    if (code === '02-010') permitBldg = extI - 800;
+    if (code === '02-030') permitElec = extI - 149;
+    if (code === '01-010') blueprints = extI - 1200;
+
+    const cat = categorize(code);
+    catsI[cat] += extI;
+    catsF[cat] += extF;
+    quoted += extI;
+    fair += extF;
+    if (isEquip(code)) equip += extI;
+    if (isShell(code)) shell += extI;
+    if (isFinish(code)) finish += extI;
+    if (isSite(code)) site += extI;
+    if (isPlumbElec(code)) plumb += extI;
+  }
+
+  let billed, feeParts;
+  if (p.fee === 'quoted') {
+    const afterGC = quoted / 0.95;
+    const gc = afterGC - quoted;
+    const feeAmt = afterGC / 0.80 - afterGC;
+    billed = quoted * BASE.markup;
+    feeParts = { direct: quoted, gc, fee: feeAmt, labels: ['Direct', 'GC (5% GM)', 'Fee (20% GM)'] };
+  } else {
+    const rate = p.fee === '15' ? 0.15 : (p.fee === '12' ? 0.12 : p.customFee / 100);
+    const feeAmt = quoted * rate;
+    billed = quoted * (1 + rate);
+    feeParts = { direct: quoted, gc: 0, fee: feeAmt, labels: ['Direct', 'Fee ' + (Math.round(rate * 1000) / 10) + '%'] };
+  }
+
+  const lightSave = Math.max(0, lightsQuoted - (3 * (p.owner ? 436 : Math.min(p.lightUnit, 550))));
+  const shotSave = Math.max(0, shotcreteQuoted - shotcreteFair);
+  const formSave = Math.max(0, formsQuoted - formsFair);
+  const savings = [
+    { rank: 1, item: 'LED lights → 3 practical', save: lightSave, note: p.lights + ' lights now' },
+    { rank: 2, item: 'Shotcrete → ~$220/CY', save: shotSave, note: '$' + p.shotcrete + '/CY now' },
+    { rank: 3, item: 'Building permit → published ~$800', save: Math.max(0, permitBldg), note: 'Miami-Dade IO 4-63' },
+    { rank: 4, item: 'Forms → ~$20/LF', save: formSave, note: '$' + p.forms + '/LF now' },
+    { rank: 5, item: 'Electrical permit → ~$149', save: Math.max(0, permitElec), note: 'IO 4-63' },
+    { rank: 6, item: 'Filter → Stan Jandy $1,151', save: Math.max(0, filterSave), note: p.filterMode === 'owner' ? 'credited' : 'owner-supply' },
+    { rank: 7, item: 'Blueprints → ~$1,200 PE', save: Math.max(0, blueprints), note: 'compete package' },
+    { rank: 8, item: 'Pump → Stan FloPro $1,491', save: Math.max(0, pumpSave), note: p.pumpMode === 'owner' ? 'credited' : 'owner-supply' },
+    { rank: 9, item: 'AUT-01 AquaLink credit $2,800', save: p.autMode === 'owner' ? 0 : (p.autMode === 'quoted' ? autSave : 0), note: p.autMode === 'owner' ? 'already credited' : "don't pay twice" },
+    { rank: 10, item: 'Elec pkg / load-center deduct', save: (p.pumpMode === 'owner' || p.owner) ? 0 : 500, note: 'Stan Intermatic ~$299' }
+  ].filter(x => x.save > 25).sort((a, b) => b.save - a.save).slice(0, 8)
+   .map((x, i) => ({ ...x, rank: i + 1 }));
+
+  return {
+    quoted, fair, billed, equip, shell, finish, site, plumb,
+    catsI, catsF, feeParts,
+    sa, sp, waterSF, savings,
+    saveVsBaseline: BASE.baselineBilled - billed
+  };
+}
+
+let pieCat, pieFee, barCat;
+const chartDefaults = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'right',
+      labels: { color: '#8b9cb3', boxWidth: 12, font: { size: 11 } }
+    },
+    tooltip: {
+      callbacks: {
+        label: (ctx) => {
+          const v = ctx.raw || 0;
+          return ' ' + ctx.label + ': ' + money(v);
+        }
+      }
+    }
+  }
+};
+
+function initCharts() {
+  const doughOpts = {
+    ...chartDefaults,
+    cutout: '52%',
+    plugins: {
+      ...chartDefaults.plugins,
+      legend: { ...chartDefaults.plugins.legend, position: 'bottom' }
+    }
+  };
+
+  pieCat = new Chart($('pieCat'), {
+    type: 'doughnut',
+    data: { labels: CAT_ORDER, datasets: [{ data: CAT_ORDER.map(() => 0), backgroundColor: CAT_COLORS, borderWidth: 0 }] },
+    options: doughOpts
+  });
+
+  pieFee = new Chart($('pieFee'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Direct', 'GC', 'Fee'],
+      datasets: [{ data: [1, 0, 0], backgroundColor: ['#818cf8', '#f59e0b', '#3d9cf0'], borderWidth: 0 }]
+    },
+    options: doughOpts
+  });
+
+  barCat = new Chart($('barCat'), {
+    type: 'bar',
+    data: {
+      labels: CAT_ORDER,
+      datasets: [
+        { label: 'Quoted unit cost', data: CAT_ORDER.map(() => 0), backgroundColor: '#818cf8' },
+        { label: 'Fair Mid', data: CAT_ORDER.map(() => 0), backgroundColor: '#2dd4bf' }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { ticks: { color: '#8b9cb3', maxRotation: 40, font: { size: 10 } }, grid: { color: 'rgba(45,63,86,.4)' } },
+        y: {
+          ticks: { color: '#8b9cb3', callback: (v) => '$' + (v / 1000) + 'k' },
+          grid: { color: 'rgba(45,63,86,.4)' }
+        }
+      },
+      plugins: {
+        legend: { labels: { color: '#8b9cb3' } },
+        tooltip: {
+          callbacks: { label: (ctx) => ' ' + ctx.dataset.label + ': ' + money(ctx.raw) }
+        }
+      }
+    }
+  });
+}
+
+function syncOwnerMaster() {
+  const on = $('ownerSupply').checked;
+  if (on) {
+    $('pumpMode').value = 'owner';
+    $('filterMode').value = 'owner';
+    $('blowerMode').value = 'owner';
+    $('autMode').value = 'owner';
+    $('lightUnit').value = 436;
+    $('lightUnitN').value = 436;
+  }
+}
+
+function updateUI() {
+  const p = getParams();
+  const r = compute(p);
+
+  $('sArea').textContent = r.sa.toFixed(3);
+  $('sPeri').textContent = r.sp.toFixed(3);
+  $('waterSF').textContent = Math.round(r.waterSF).toLocaleString('en-US');
+
+  $('kDirect').textContent = money(r.quoted);
+  $('kFair').textContent = money(r.fair);
+  $('kBilled').textContent = money(r.billed);
+  $('kSave').textContent = money(r.saveVsBaseline);
+  $('kEquip').textContent = money(r.equip);
+  $('kShell').textContent = money(r.shell);
+  $('kFinish').textContent = money(r.finish);
+  $('kSite').textContent = money(r.site);
+  $('kPlumb').textContent = money(r.plumb);
+
+  const feeNames = {
+    quoted: 'Quoted stacked ×1.3158',
+    '15': 'Fair 15% fee',
+    '12': 'Fair 12% fee',
+    custom: 'Custom ' + p.customFee + '% fee'
+  };
+  $('kFeeLabel').textContent = feeNames[p.fee] || '';
+  $('spaParams').style.opacity = p.spaOn ? '1' : '0.4';
+  $('spaParams').style.pointerEvents = p.spaOn ? 'auto' : 'none';
+  $('customFeeWrap').style.display = p.fee === 'custom' ? 'block' : 'none';
+
+  if (pieCat) {
+    pieCat.data.datasets[0].data = CAT_ORDER.map(c => Math.round(r.catsI[c]));
+    pieCat.update('none');
+  }
+
+  if (pieFee) {
+    if (p.fee === 'quoted') {
+      $('pieFeeTitle').textContent = 'Direct vs GC vs Fee (quoted stacked)';
+      pieFee.data.labels = r.feeParts.labels;
+      pieFee.data.datasets[0].data = [
+        Math.round(r.feeParts.direct),
+        Math.round(r.feeParts.gc),
+        Math.round(r.feeParts.fee)
+      ];
+      pieFee.data.datasets[0].backgroundColor = ['#818cf8', '#f59e0b', '#3d9cf0'];
+    } else {
+      $('pieFeeTitle').textContent = 'Direct vs Fee';
+      pieFee.data.labels = r.feeParts.labels;
+      pieFee.data.datasets[0].data = [
+        Math.round(r.feeParts.direct),
+        Math.round(r.feeParts.fee)
+      ];
+      pieFee.data.datasets[0].backgroundColor = ['#818cf8', '#3d9cf0'];
+    }
+    pieFee.update('none');
+  }
+
+  if (barCat) {
+    barCat.data.datasets[0].data = CAT_ORDER.map(c => Math.round(r.catsI[c]));
+    barCat.data.datasets[1].data = CAT_ORDER.map(c => Math.round(r.catsF[c]));
+    barCat.update('none');
+  }
+
+  const ul = $('savingsList');
+  ul.innerHTML = r.savings.length
+    ? r.savings.map(s =>
+        `<li><span class="rank">#${s.rank}</span><span><strong>${s.item}</strong><br/><span style="color:var(--muted);font-size:.72rem">${s.note}</span></span><span class="amt">${money(s.save)} cost</span></li>`
+      ).join('')
+    : '<li style="grid-column:1/-1;color:var(--muted)">No material savings left at these settings — already lean.</li>';
+}
+
+function bindPair(rangeId, numId, lo, hi, step) {
+  const r = $(rangeId), n = $(numId);
+  const sync = (from) => {
+    let v = +from.value;
+    if (Number.isNaN(v)) v = +r.value;
+    v = clamp(v, lo, hi);
+    const prec = step < 1 ? (String(step).split('.')[1] || '').length : 0;
+    v = Math.round(v / step) * step;
+    if (prec) v = +v.toFixed(prec);
+    r.value = v;
+    n.value = v;
+    updateUI();
+  };
+  r.addEventListener('input', () => sync(r));
+  n.addEventListener('change', () => sync(n));
+  n.addEventListener('input', () => { if (n.value !== '') sync(n); });
+}
+
+function setAll(vals) {
+  const map = {
+    L: ['len', 'lenN'], W: ['wid', 'widN'],
+    lights: ['lights', 'lightsN'], lightUnit: ['lightUnit', 'lightUnitN'],
+    spaL: ['spaL', 'spaLN'], spaW: ['spaW', 'spaWN'],
+    depthFac: ['depthFac', 'depthFacN'], waterOverride: ['waterOverride', 'waterOverrideN'],
+    excavMult: ['excavMult', 'excavMultN'], haulLoad: ['haulLoad', 'haulLoadN'],
+    haulMult: ['haulMult', 'haulMultN'], gravelMult: ['gravelMult', 'gravelMultN'],
+    shotcrete: ['shotcrete', 'shotcreteN'], thick: ['thick', 'thickN'],
+    rebar: ['rebar', 'rebarN'], forms: ['forms', 'formsN'],
+    tileMat: ['tileMat', 'tileMatN'], tileInst: ['tileInst', 'tileInstN'],
+    copingMat: ['copingMat', 'copingMatN'], copingInst: ['copingInst', 'copingInstN'],
+    plaster: ['plaster', 'plasterN'], customFee: ['customFee', 'customFeeN']
+  };
+  for (const [k, ids] of Object.entries(map)) {
+    if (vals[k] !== undefined) {
+      $(ids[0]).value = vals[k];
+      $(ids[1]).value = vals[k];
+    }
+  }
+  if (vals.spaOn !== undefined) $('spaOn').checked = vals.spaOn;
+  if (vals.gravelOn !== undefined) $('gravelOn').checked = vals.gravelOn;
+  if (vals.backfillOn !== undefined) $('backfillOn').checked = vals.backfillOn;
+  if (vals.fenceOn !== undefined) $('fenceOn').checked = vals.fenceOn;
+  if (vals.wftOn !== undefined) $('wftOn').checked = vals.wftOn;
+  if (vals.saltOn !== undefined) $('saltOn').checked = vals.saltOn;
+  if (vals.heaterOn !== undefined) $('heaterOn').checked = vals.heaterOn;
+  if (vals.owner !== undefined) $('ownerSupply').checked = vals.owner;
+  if (vals.fee !== undefined) $('feeModel').value = vals.fee;
+  if (vals.permitMode !== undefined) $('permitMode').value = vals.permitMode;
+  if (vals.plasterGrade !== undefined) $('plasterGrade').value = vals.plasterGrade;
+  if (vals.concType !== undefined) $('concType').value = vals.concType;
+  if (vals.pumpMode !== undefined) $('pumpMode').value = vals.pumpMode;
+  if (vals.filterMode !== undefined) $('filterMode').value = vals.filterMode;
+  if (vals.autMode !== undefined) $('autMode').value = vals.autMode;
+  if (vals.blowerMode !== undefined) $('blowerMode').value = vals.blowerMode;
+  updateUI();
+}
+
+const BASELINE = {
+  L: 60, W: 38, lights: 9, lightUnit: 600, spaOn: true, spaL: 7, spaW: 7,
+  depthFac: 1, waterOverride: 0, excavMult: 1, haulLoad: 200, haulMult: 1,
+  gravelOn: true, backfillOn: true, gravelMult: 1, fenceOn: true,
+  shotcrete: 275, thick: 1, rebar: 0.6, forms: 28, concType: '275',
+  tileMat: 8, tileInst: 12, copingMat: 7, copingInst: 12, plaster: 5, plasterGrade: '1',
+  wftOn: true, pumpMode: 'quoted', filterMode: 'quoted', saltOn: true, heaterOn: true,
+  autMode: 'quoted', blowerMode: 'quoted', owner: false,
+  fee: 'quoted', customFee: 18, permitMode: 'quoted'
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof Chart === 'undefined') {
+    document.querySelector('.charts').innerHTML =
+      '<div class="chart-card wide" style="color:var(--warn)">Chart.js CDN failed to load — KPIs still work. Reopen with network once to cache the library.</div>';
+  } else {
+    initCharts();
+  }
+
+  bindPair('len', 'lenN', 40, 80, 1);
+  bindPair('wid', 'widN', 25, 50, 1);
+  bindPair('lights', 'lightsN', 0, 12, 1);
+  bindPair('lightUnit', 'lightUnitN', 300, 800, 10);
+  bindPair('spaL', 'spaLN', 5, 12, 0.5);
+  bindPair('spaW', 'spaWN', 5, 12, 0.5);
+  bindPair('depthFac', 'depthFacN', 0.85, 1.2, 0.01);
+  bindPair('waterOverride', 'waterOverrideN', 0, 3500, 10);
+  bindPair('excavMult', 'excavMultN', 0.8, 1.4, 0.05);
+  bindPair('haulLoad', 'haulLoadN', 120, 350, 5);
+  bindPair('haulMult', 'haulMultN', 0.5, 1.5, 0.05);
+  bindPair('gravelMult', 'gravelMultN', 0.5, 1.5, 0.05);
+  bindPair('shotcrete', 'shotcreteN', 180, 350, 5);
+  bindPair('thick', 'thickN', 0.85, 1.25, 0.01);
+  bindPair('rebar', 'rebarN', 0.4, 1.0, 0.01);
+  bindPair('forms', 'formsN', 12, 35, 1);
+  bindPair('tileMat', 'tileMatN', 4, 20, 0.5);
+  bindPair('tileInst', 'tileInstN', 6, 25, 0.5);
+  bindPair('copingMat', 'copingMatN', 3, 18, 0.5);
+  bindPair('copingInst', 'copingInstN', 6, 25, 0.5);
+  bindPair('plaster', 'plasterN', 3, 12, 0.25);
+  bindPair('customFee', 'customFeeN', 10, 35, 0.5);
+
+  ['spaOn', 'feeModel', 'ownerSupply', 'gravelOn', 'backfillOn', 'fenceOn',
+   'wftOn', 'saltOn', 'heaterOn', 'pumpMode', 'filterMode', 'autMode',
+   'blowerMode', 'permitMode', 'plasterGrade', 'concType'].forEach(id => {
+    $(id).addEventListener('change', () => {
+      if (id === 'ownerSupply') syncOwnerMaster();
+      if (id === 'concType') {
+        const v = $('concType').value;
+        $('shotcrete').value = v;
+        $('shotcreteN').value = v;
+      }
+      // if individual equipment changed away from owner, uncheck master
+      if (['pumpMode', 'filterMode', 'autMode', 'blowerMode'].includes(id)) {
+        const allOwner = ['pumpMode', 'filterMode', 'blowerMode', 'autMode']
+          .every(x => $(x).value === 'owner');
+        if (!allOwner) $('ownerSupply').checked = false;
+      }
+      updateUI();
+    });
+  });
+
+  $('btnReset').addEventListener('click', () => setAll(BASELINE));
+
+  $('btnRecommend').addEventListener('click', () => setAll({
+    L: +$('len').value, W: +$('wid').value,
+    lights: 3, lightUnit: 436,
+    spaOn: $('spaOn').checked, spaL: +$('spaL').value, spaW: +$('spaW').value,
+    depthFac: 1, waterOverride: +$('waterOverride').value,
+    excavMult: 1, haulLoad: 200, haulMult: 1,
+    gravelOn: true, backfillOn: true, gravelMult: 1, fenceOn: true,
+    shotcrete: 220, thick: 1, rebar: 0.6, forms: 20, concType: '220',
+    tileMat: 8, tileInst: 12, copingMat: 7, copingInst: 12, plaster: 5, plasterGrade: '1',
+    wftOn: $('wftOn').checked,
+    pumpMode: 'owner', filterMode: 'owner', saltOn: true, heaterOn: true,
+    autMode: 'owner', blowerMode: 'owner', owner: true,
+    fee: '15', customFee: 15, permitMode: 'actual'
+  }));
+
+  updateUI();
+});
+</script>
+</body>
+</html>

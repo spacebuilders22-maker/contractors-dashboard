@@ -410,6 +410,8 @@
   .lineout { font-family: var(--mono); font-size: 0.64rem; color: var(--muted); margin-top: 0.2rem; line-height: 1.35; }
   .lineout div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .lineout.solo { margin: -0.25rem 0 0.5rem 0.2rem; }
+  .subhead { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0.2rem 0 0.45rem; border-top: 1px solid var(--border); padding-top: 0.55rem; }
+  details.model-notes table.lines tr.cat td { background: var(--bg3); color: var(--text); font-weight: 600; }
   details.model-notes table.lines td.num, details.model-notes table.lines th.num { text-align: right; font-family: var(--mono); white-space: nowrap; }
   details.model-notes table.lines tr.off td { opacity: 0.45; }
 
@@ -770,9 +772,86 @@
       </div>
     </details>
 
-    <!-- F. Commercial -->
+    <!-- F. Soft costs -->
     <details class="acc" open>
-      <summary>F · Commercial</summary>
+      <summary>F · Soft costs</summary>
+      <div class="acc-body">
+        <div class="param">
+          <label>Engineering plans (lump sum) <span class="hint">ENG-01 · bundled in 01-010</span></label>
+          <div class="row">
+            <input type="range" id="eng" min="0" max="6000" step="10" value="0" />
+            <input type="number" id="engN" min="0" max="6000" step="10" value="0" />
+          </div>
+          <div class="lineout" data-codes="ENG-01"></div>
+        </div>
+        <div class="param">
+          <label>Design / blueprints (lump sum) <span class="hint">01-010 · quoted $2,000 lump sum</span></label>
+          <div class="row">
+            <input type="range" id="design" min="0" max="6000" step="10" value="2000" />
+            <input type="number" id="designN" min="0" max="6000" step="10" value="2000" />
+          </div>
+          <div class="lineout" data-codes="01-010,SPA-01,HTR-01"></div>
+        </div>
+        <div class="subhead">County fees · per permit (1 ls each)</div>
+        <div class="param">
+          <label>Permit fee preset <span class="hint">sets building + electrical</span></label>
+          <select id="permitMode">
+            <option value="quoted" selected>Quoted (allowance)</option>
+            <option value="actual">Actual Miami-Dade fees</option>
+            <option value="custom" disabled>Custom (edited)</option>
+          </select>
+        </div>
+        <div class="param">
+          <label>Building permit (lump sum) <span class="hint">02-010 · quoted $2,000 · actual ~$800</span></label>
+          <div class="row">
+            <input type="range" id="permBldg" min="0" max="4000" step="1" value="2000" />
+            <input type="number" id="permBldgN" min="0" max="4000" step="1" value="2000" />
+          </div>
+          <div class="lineout" data-codes="02-010"></div>
+        </div>
+        <div class="param">
+          <label>Plumbing permit (lump sum) <span class="hint">02-020 · quoted $0</span></label>
+          <div class="row">
+            <input type="range" id="permPlumb" min="0" max="1000" step="1" value="0" />
+            <input type="number" id="permPlumbN" min="0" max="1000" step="1" value="0" />
+          </div>
+          <div class="lineout" data-codes="02-020"></div>
+        </div>
+        <div class="param">
+          <label>Electrical permit (lump sum) <span class="hint">02-030 · quoted $900 · actual ~$149</span></label>
+          <div class="row">
+            <input type="range" id="permElec" min="0" max="2000" step="1" value="900" />
+            <input type="number" id="permElecN" min="0" max="2000" step="1" value="900" />
+          </div>
+          <div class="lineout" data-codes="02-030"></div>
+        </div>
+        <div class="param">
+          <label>DERM / zoning (lump sum) <span class="hint">02-040 · quoted $0 allowance</span></label>
+          <div class="row">
+            <input type="range" id="permDerm" min="0" max="2000" step="1" value="0" />
+            <input type="number" id="permDermN" min="0" max="2000" step="1" value="0" />
+          </div>
+          <div class="lineout" data-codes="02-040"></div>
+        </div>
+        <div class="param">
+          <label>Permit runner (lump sum) <span class="hint">01-020 · quoted $0 · in GC</span></label>
+          <div class="row">
+            <input type="range" id="permRunner" min="0" max="2000" step="1" value="0" />
+            <input type="number" id="permRunnerN" min="0" max="2000" step="1" value="0" />
+          </div>
+          <div class="lineout" data-codes="01-020"></div>
+        </div>
+        <div class="scale-pills">
+          <div class="pill"><span>design+eng </span><strong id="softDesign">$2,000</strong></div>
+          <div class="pill"><span>county </span><strong id="softCounty">$2,900</strong></div>
+          <div class="pill"><span>soft total </span><strong id="softTotal">$4,900</strong></div>
+        </div>
+      </div>
+    </details>
+
+    <!-- G. Commercial -->
+    <details class="acc" open>
+      <summary>G · Commercial</summary>
       <div class="acc-body">
         <div class="param">
           <label>Fee model</label>
@@ -789,14 +868,6 @@
             <input type="range" id="customFee" min="10" max="35" step="0.5" value="18" />
             <input type="number" id="customFeeN" min="10" max="35" step="0.5" value="18" />
           </div>
-        </div>
-        <div class="param">
-          <label>Building / electrical permits</label>
-          <select id="permitMode">
-            <option value="quoted" selected>Quoted (allowance)</option>
-            <option value="actual">Actual Miami-Dade fees</option>
-          </select>
-          <div class="lineout" data-codes="02-010,02-030"></div>
         </div>
       </div>
     </details>
@@ -915,7 +986,7 @@
       <summary>Model notes &amp; assumptions</summary>
       <div class="body">
         <p>Embedded cost model from contractor Quote <code>#26072701</code> and local Miami rate audit spreadsheet
-        (59 line items). Quote/model numbers kept here for validation only.</p>
+        (59 priced lines, plus the quote's $0 blueprint addenda SPA-01 / HTR-01 and an ENG-01 engineering placeholder). Quote/model numbers kept here for validation only.</p>
         <p><strong>Baseline pool:</strong> 60×38 ft, water SF ≈ 1,580. Spa 7×7 separate.
         Scaled Quoted Direct ≈ <code>$115,771</code> → quoted billed ≈ <code>$152,330</code>
         (stacked fee ×1.3158, thickness 1.0, 9 lights, no owner-supply).</p>
@@ -938,7 +1009,14 @@
         <p><strong>Units:</strong> every line carries its unit of measure exactly as written in Indigo's Budget sheet —
         <code>ls</code> (lump sum), <code>LF</code>, <code>sq ft</code>, <code>CY</code>, <code>truck</code> (truckload), <code>ea</code>.
         Rebar is priced per <code>LF</code> ($0.60/LF), not per lb.</p>
-        <p><strong>Permits:</strong> Quoted uses line allowances; Actual Miami-Dade uses published ~$800 building / ~$149 electrical.</p>
+        <p><strong>Soft costs (F):</strong> each control is a lump-sum $ on a 1&nbsp;ls line, defaulting to the quoted amount.
+        Engineering plans → <code>ENG-01</code> (default $0: the quote has no engineering line; the contract says engineering is included,
+        i.e. bundled in <code>01-010</code>; fair = quoted). Design / blueprints → <code>01-010</code> ($2,000; spa/heater addenda
+        <code>SPA-01</code> / <code>HTR-01</code> are $0 in the quote). County fees, per permit: building <code>02-010</code> $2,000,
+        plumbing <code>02-020</code> $0, electrical <code>02-030</code> $900, DERM/zoning <code>02-040</code> $0, permit runner
+        <code>01-020</code> $0 (contract puts permit-running in General Conditions).</p>
+        <p><strong>Permits preset:</strong> Quoted uses line allowances; Actual Miami-Dade sets ~$800 building / ~$149 electrical
+        (IO 4-63). Editing either fee shows “Custom (edited)”. Fair values for 01-/02- lines are unchanged audit numbers.</p>
         <table>
           <tr><th>Validation</th><th>Scaled Quoted Direct</th><th>Equipment</th></tr>
           <tr><td>Baseline 60×38</td><td>≈ $115,771</td><td>≈ $22,428.52</td></tr>
@@ -957,12 +1035,13 @@
 </div>
 
 <script>
-// Line data: c=code, n=item, s=section, q=quoted qty, u=quoted unit cost ($ per m), m=unit of measure exactly as Indigo Quote #26072701 Budget sheet (ls, LF, sq ft, truck, ea, CY), b=scale basis, f=fair-mid ext $ for qty q (so fair $/unit = f/q, same unit m)
-const LINES = [{"c":"01-010","n":"Blueprints \u2013 standard pool","s":"01 Design & Engineering","q":1.0,"u":2000.0,"b":"Fixed","f":1150.0,"m":"ls"},{"c":"01-020","n":"Permit runner / expediting","s":"01 Design & Engineering","q":1.0,"u":0.0,"b":"Fixed","f":750.0,"m":"ls"},{"c":"02-010","n":"Building permit","s":"02 Permits","q":1.0,"u":2000.0,"b":"Fixed","f":800.0,"m":"ls"},{"c":"02-020","n":"Plumbing permit","s":"02 Permits","q":1.0,"u":0.0,"b":"Fixed","f":125.0,"m":"ls"},{"c":"02-030","n":"Electrical permit","s":"02 Permits","q":1.0,"u":900.0,"b":"Fixed","f":149.0,"m":"ls"},{"c":"02-040","n":"DERM / zoning allowance","s":"02 Permits","q":1.0,"u":0.0,"b":"Fixed","f":500.0,"m":"ls"},{"c":"03-010","n":"Temp safety + silt fencing","s":"03 Site Prep","q":238.0,"u":3.0,"b":"Perimeter","f":1190.0,"m":"LF"},{"c":"04-010","n":"Excavation \u2013 dig & load","s":"04 Excavation & Hauling","q":1580.0,"u":4.5,"b":"Area","f":5925.0,"m":"sq ft"},{"c":"04-050","n":"Dirt haul-off","s":"04 Excavation & Hauling","q":17.0,"u":200.0,"b":"Area","f":8075.0,"m":"truck"},{"c":"04-060","n":"Backfill & rough grading","s":"04 Excavation & Hauling","q":3.0,"u":700.0,"b":"Area","f":2250.0,"m":"ls"},{"c":"04-070","n":"Compaction","s":"04 Excavation & Hauling","q":1.0,"u":500.0,"b":"Fixed","f":550.0,"m":"ls"},{"c":"04-080","n":"Gravel","s":"04 Excavation & Hauling","q":2.0,"u":650.0,"b":"Area","f":2900.0,"m":"truck"},{"c":"05-010","n":"Forms \u2013 pool (sub)","s":"05 Forms & Rebar","q":218.0,"u":28.0,"b":"Perimeter","f":4033.0,"m":"LF"},{"c":"05-020","n":"Rebar material \u2013 pool","s":"05 Forms & Rebar","q":6776.04,"u":0.6,"b":"Area","f":3896.0,"m":"LF"},{"c":"05-030","n":"Steps & sunshelf forming","s":"05 Forms & Rebar","q":1.0,"u":1000.0,"b":"Fixed","f":1125.0,"m":"ls"},{"c":"06-010","n":"Shotcrete ALL-IN \u2013 pool","s":"06 Shotcrete Shell","q":78.46,"u":275.0,"b":"Area","f":16869.0,"m":"CY"},{"c":"07-010","n":"Pool plumbing rough & pressure test","s":"07 Plumbing","q":1.0,"u":2000.0,"b":"Fixed","f":2250.0,"m":"ls"},{"c":"07-020","n":"Main drain \u2013 pool","s":"07 Plumbing","q":1.0,"u":125.0,"b":"Fixed","f":115.0,"m":"ea"},{"c":"07-030","n":"Sunshelf plumbing","s":"07 Plumbing","q":2.0,"u":150.0,"b":"Fixed","f":300.0,"m":"ls"},{"c":"07-040","n":"Trench \u2013 equipment run","s":"07 Plumbing","q":1.0,"u":1000.0,"b":"Fixed","f":1000.0,"m":"ls"},{"c":"07-050","n":"Additional lines up to 3\"","s":"07 Plumbing","q":6.0,"u":100.0,"b":"Fixed","f":540.0,"m":"ea"},{"c":"07-060","n":"Additional valves / actuators","s":"07 Plumbing","q":6.0,"u":75.0,"b":"Fixed","f":600.0,"m":"ea"},{"c":"08-010","n":"Pool electrical package","s":"08 Electrical","q":1.0,"u":4000.0,"b":"Fixed","f":3500.0,"m":"ls"},{"c":"08-020","n":"Salt system hook-up","s":"08 Electrical","q":1.0,"u":100.0,"b":"Fixed","f":137.5,"m":"ls"},{"c":"08-030","n":"Heater-ready provision","s":"08 Electrical","q":1.0,"u":100.0,"b":"Fixed","f":162.5,"m":"ls"},{"c":"09-010","n":"Tile material \u2013 pool","s":"09 Tile & Coping","q":332.2,"u":8.0,"b":"Perimeter","f":2824.0,"m":"LF"},{"c":"09-020","n":"Tile install \u2013 pool","s":"09 Tile & Coping","q":302.0,"u":12.0,"b":"Perimeter","f":4530.0,"m":"LF"},{"c":"09-030","n":"Coping material \u2013 pool","s":"09 Tile & Coping","q":235.4,"u":7.0,"b":"Perimeter","f":1648.0,"m":"LF"},{"c":"09-040","n":"Coping install \u2013 pool","s":"09 Tile & Coping","q":214.0,"u":12.0,"b":"Perimeter","f":3210.0,"m":"LF"},{"c":"10-010","n":"Plaster \u2013 pool (sub incl. material)","s":"10 Plaster & Startup","q":2030.79,"u":5.0,"b":"Area","f":13200.0,"m":"sq ft"},{"c":"10-030","n":"Pool startup & chemicals (1 week)","s":"10 Plaster & Startup","q":1.0,"u":500.0,"b":"Fixed","f":550.0,"m":"ls"},{"c":"11-010","n":"Pump \u2013 IntelliFlo3 VSF","s":"11 Equipment","q":1.0,"u":1978.52,"b":"Fixed","f":1869.0,"m":"ea"},{"c":"11-020","n":"Filter \u2013 CCP 420","s":"11 Equipment","q":1.0,"u":1900.0,"b":"Fixed","f":1510.0,"m":"ea"},{"c":"11-030","n":"Salt system \u2013 IntelliChlor+ 40k","s":"11 Equipment","q":1.0,"u":1900.0,"b":"Fixed","f":2175.0,"m":"ea"},{"c":"11-040","n":"Pool lights (LED, installed)","s":"11 Equipment","q":9.0,"u":600.0,"b":"Fixed","f":1650.0,"m":"ea"},{"c":"11-050","n":"White goods & misc allowance","s":"11 Equipment","q":1.0,"u":700.0,"b":"Fixed","f":600.0,"m":"ls"},{"c":"11-060","n":"Equipment install labor \u2013 pool","s":"11 Equipment","q":1.0,"u":900.0,"b":"Fixed","f":1125.0,"m":"ls"},{"c":"SPA-02","n":"Forms \u2013 spa (sub)","s":"OPT \u2013 Spa","q":32.0,"u":28.0,"b":"SpaPerimeter","f":640.0,"m":"LF"},{"c":"SPA-03","n":"Spa form adder (raised walls)","s":"OPT \u2013 Spa","q":1.0,"u":1500.0,"b":"Fixed","f":1500.0,"m":"ls"},{"c":"SPA-04","n":"Rebar material \u2013 spa","s":"OPT \u2013 Spa","q":328.94,"u":0.6,"b":"SpaArea","f":189.0,"m":"LF"},{"c":"SPA-05","n":"Shotcrete ALL-IN \u2013 spa","s":"OPT \u2013 Spa","q":4.29,"u":300.0,"b":"SpaArea","f":944.0,"m":"CY"},{"c":"SPA-06","n":"Spa plumbing adder","s":"OPT \u2013 Spa","q":1.0,"u":700.0,"b":"Fixed","f":750.0,"m":"ls"},{"c":"SPA-07","n":"Spa jet pre-plumb (up to 6 jets)","s":"OPT \u2013 Spa","q":1.0,"u":750.0,"b":"Fixed","f":750.0,"m":"ls"},{"c":"SPA-09","n":"Main drain \u2013 spa","s":"OPT \u2013 Spa","q":1.0,"u":125.0,"b":"Fixed","f":115.0,"m":"ea"},{"c":"SPA-10","n":"Spa electrical adder","s":"OPT \u2013 Spa","q":1.0,"u":750.0,"b":"Fixed","f":600.0,"m":"ls"},{"c":"SPA-11","n":"Tile material \u2013 spa","s":"OPT \u2013 Spa","q":44.0,"u":8.0,"b":"SpaPerimeter","f":374.0,"m":"LF"},{"c":"SPA-12","n":"Tile install \u2013 spa","s":"OPT \u2013 Spa","q":40.0,"u":12.0,"b":"SpaPerimeter","f":600.0,"m":"LF"},{"c":"SPA-13","n":"Coping material \u2013 spa","s":"OPT \u2013 Spa","q":30.8,"u":7.0,"b":"SpaPerimeter","f":216.0,"m":"LF"},{"c":"SPA-14","n":"Coping install \u2013 spa","s":"OPT \u2013 Spa","q":28.0,"u":12.0,"b":"SpaPerimeter","f":420.0,"m":"LF"},{"c":"SPA-15","n":"Plaster \u2013 spa (sub incl. material)","s":"OPT \u2013 Spa","q":147.0,"u":5.5,"b":"SpaArea","f":956.0,"m":"sq ft"},{"c":"SPA-16","n":"Spa blower (unit + install)","s":"OPT \u2013 Spa","q":1.0,"u":300.0,"b":"Fixed","f":300.0,"m":"ea"},{"c":"SPA-17","n":"Equipment install adder \u2013 spa","s":"OPT \u2013 Spa","q":1.0,"u":200.0,"b":"Fixed","f":250.0,"m":"ls"},{"c":"HTR-02","n":"Heater \u2013 UltraTemp 140","s":"OPT \u2013 Heater","q":1.0,"u":5800.0,"b":"Fixed","f":5948.0,"m":"ea"},{"c":"HTR-03","n":"Heater install (set & plumb)","s":"OPT \u2013 Heater","q":1.0,"u":0.0,"b":"Fixed","f":800.0,"m":"ls"},{"c":"HTR-04","n":"Heater electrical (breaker + wire)","s":"OPT \u2013 Heater","q":1.0,"u":350.0,"b":"Fixed","f":425.0,"m":"ls"},{"c":"AUT-01","n":"Automation package (unit + install)","s":"OPT \u2013 Automation","q":1.0,"u":2800.0,"b":"Fixed","f":0.0,"m":"ls"},{"c":"WFT-01","n":"Stepping stones \u2013 shotcrete, rebar & finish (5 pads)","s":"OPT \u2013 Water Features","q":1.0,"u":1048.85,"b":"Fixed","f":1050.0,"m":"ls"},{"c":"WFT-02","n":"Stepping stones \u2013 forming & shaping labor","s":"OPT \u2013 Water Features","q":1.0,"u":1500.0,"b":"Fixed","f":900.0,"m":"ls"},{"c":"BAR-01","n":"Baby fence (Redpro) \u2014 FL required","s":"OPT \u2013 Barrier","q":0.0,"u":12.2,"b":"Perimeter","f":1700.0,"m":"LF"}];
+// Line data: c=code, n=item, s=section, q=quoted qty, u=quoted unit cost ($ per m), m=unit of measure exactly as Indigo Quote #26072701 Budget sheet (ls, LF, sq ft, truck, ea, CY), x=note for a non-quote line (ENG-01), b=scale basis, f=fair-mid ext $ for qty q (so fair $/unit = f/q, same unit m)
+const LINES = [{"c":"ENG-01","n":"Engineering plans (structural/flood, signed & sealed)","s":"01 Design & Engineering","q":1.0,"u":0.0,"b":"Fixed","f":0.0,"m":"ls","x":"Not a separate quote line: contract says engineering is included (bundled in 01-010 Blueprints). Fair = quoted (no data)."},{"c":"01-010","n":"Blueprints \u2013 standard pool","s":"01 Design & Engineering","q":1.0,"u":2000.0,"b":"Fixed","f":1150.0,"m":"ls"},{"c":"01-020","n":"Permit runner / expediting","s":"01 Design & Engineering","q":1.0,"u":0.0,"b":"Fixed","f":750.0,"m":"ls"},{"c":"02-010","n":"Building permit","s":"02 Permits","q":1.0,"u":2000.0,"b":"Fixed","f":800.0,"m":"ls"},{"c":"02-020","n":"Plumbing permit","s":"02 Permits","q":1.0,"u":0.0,"b":"Fixed","f":125.0,"m":"ls"},{"c":"02-030","n":"Electrical permit","s":"02 Permits","q":1.0,"u":900.0,"b":"Fixed","f":149.0,"m":"ls"},{"c":"02-040","n":"DERM / zoning allowance","s":"02 Permits","q":1.0,"u":0.0,"b":"Fixed","f":500.0,"m":"ls"},{"c":"03-010","n":"Temp safety + silt fencing","s":"03 Site Prep","q":238.0,"u":3.0,"b":"Perimeter","f":1190.0,"m":"LF"},{"c":"04-010","n":"Excavation \u2013 dig & load","s":"04 Excavation & Hauling","q":1580.0,"u":4.5,"b":"Area","f":5925.0,"m":"sq ft"},{"c":"04-050","n":"Dirt haul-off","s":"04 Excavation & Hauling","q":17.0,"u":200.0,"b":"Area","f":8075.0,"m":"truck"},{"c":"04-060","n":"Backfill & rough grading","s":"04 Excavation & Hauling","q":3.0,"u":700.0,"b":"Area","f":2250.0,"m":"ls"},{"c":"04-070","n":"Compaction","s":"04 Excavation & Hauling","q":1.0,"u":500.0,"b":"Fixed","f":550.0,"m":"ls"},{"c":"04-080","n":"Gravel","s":"04 Excavation & Hauling","q":2.0,"u":650.0,"b":"Area","f":2900.0,"m":"truck"},{"c":"05-010","n":"Forms \u2013 pool (sub)","s":"05 Forms & Rebar","q":218.0,"u":28.0,"b":"Perimeter","f":4033.0,"m":"LF"},{"c":"05-020","n":"Rebar material \u2013 pool","s":"05 Forms & Rebar","q":6776.04,"u":0.6,"b":"Area","f":3896.0,"m":"LF"},{"c":"05-030","n":"Steps & sunshelf forming","s":"05 Forms & Rebar","q":1.0,"u":1000.0,"b":"Fixed","f":1125.0,"m":"ls"},{"c":"06-010","n":"Shotcrete ALL-IN \u2013 pool","s":"06 Shotcrete Shell","q":78.46,"u":275.0,"b":"Area","f":16869.0,"m":"CY"},{"c":"07-010","n":"Pool plumbing rough & pressure test","s":"07 Plumbing","q":1.0,"u":2000.0,"b":"Fixed","f":2250.0,"m":"ls"},{"c":"07-020","n":"Main drain \u2013 pool","s":"07 Plumbing","q":1.0,"u":125.0,"b":"Fixed","f":115.0,"m":"ea"},{"c":"07-030","n":"Sunshelf plumbing","s":"07 Plumbing","q":2.0,"u":150.0,"b":"Fixed","f":300.0,"m":"ls"},{"c":"07-040","n":"Trench \u2013 equipment run","s":"07 Plumbing","q":1.0,"u":1000.0,"b":"Fixed","f":1000.0,"m":"ls"},{"c":"07-050","n":"Additional lines up to 3\"","s":"07 Plumbing","q":6.0,"u":100.0,"b":"Fixed","f":540.0,"m":"ea"},{"c":"07-060","n":"Additional valves / actuators","s":"07 Plumbing","q":6.0,"u":75.0,"b":"Fixed","f":600.0,"m":"ea"},{"c":"08-010","n":"Pool electrical package","s":"08 Electrical","q":1.0,"u":4000.0,"b":"Fixed","f":3500.0,"m":"ls"},{"c":"08-020","n":"Salt system hook-up","s":"08 Electrical","q":1.0,"u":100.0,"b":"Fixed","f":137.5,"m":"ls"},{"c":"08-030","n":"Heater-ready provision","s":"08 Electrical","q":1.0,"u":100.0,"b":"Fixed","f":162.5,"m":"ls"},{"c":"09-010","n":"Tile material \u2013 pool","s":"09 Tile & Coping","q":332.2,"u":8.0,"b":"Perimeter","f":2824.0,"m":"LF"},{"c":"09-020","n":"Tile install \u2013 pool","s":"09 Tile & Coping","q":302.0,"u":12.0,"b":"Perimeter","f":4530.0,"m":"LF"},{"c":"09-030","n":"Coping material \u2013 pool","s":"09 Tile & Coping","q":235.4,"u":7.0,"b":"Perimeter","f":1648.0,"m":"LF"},{"c":"09-040","n":"Coping install \u2013 pool","s":"09 Tile & Coping","q":214.0,"u":12.0,"b":"Perimeter","f":3210.0,"m":"LF"},{"c":"10-010","n":"Plaster \u2013 pool (sub incl. material)","s":"10 Plaster & Startup","q":2030.79,"u":5.0,"b":"Area","f":13200.0,"m":"sq ft"},{"c":"10-030","n":"Pool startup & chemicals (1 week)","s":"10 Plaster & Startup","q":1.0,"u":500.0,"b":"Fixed","f":550.0,"m":"ls"},{"c":"11-010","n":"Pump \u2013 IntelliFlo3 VSF","s":"11 Equipment","q":1.0,"u":1978.52,"b":"Fixed","f":1869.0,"m":"ea"},{"c":"11-020","n":"Filter \u2013 CCP 420","s":"11 Equipment","q":1.0,"u":1900.0,"b":"Fixed","f":1510.0,"m":"ea"},{"c":"11-030","n":"Salt system \u2013 IntelliChlor+ 40k","s":"11 Equipment","q":1.0,"u":1900.0,"b":"Fixed","f":2175.0,"m":"ea"},{"c":"11-040","n":"Pool lights (LED, installed)","s":"11 Equipment","q":9.0,"u":600.0,"b":"Fixed","f":1650.0,"m":"ea"},{"c":"11-050","n":"White goods & misc allowance","s":"11 Equipment","q":1.0,"u":700.0,"b":"Fixed","f":600.0,"m":"ls"},{"c":"11-060","n":"Equipment install labor \u2013 pool","s":"11 Equipment","q":1.0,"u":900.0,"b":"Fixed","f":1125.0,"m":"ls"},{"c":"SPA-01","n":"Blueprint addendum \u2013 spa","s":"OPT \u2013 Spa","q":1.0,"u":0.0,"b":"Fixed","f":0.0,"m":"ls"},{"c":"SPA-02","n":"Forms \u2013 spa (sub)","s":"OPT \u2013 Spa","q":32.0,"u":28.0,"b":"SpaPerimeter","f":640.0,"m":"LF"},{"c":"SPA-03","n":"Spa form adder (raised walls)","s":"OPT \u2013 Spa","q":1.0,"u":1500.0,"b":"Fixed","f":1500.0,"m":"ls"},{"c":"SPA-04","n":"Rebar material \u2013 spa","s":"OPT \u2013 Spa","q":328.94,"u":0.6,"b":"SpaArea","f":189.0,"m":"LF"},{"c":"SPA-05","n":"Shotcrete ALL-IN \u2013 spa","s":"OPT \u2013 Spa","q":4.29,"u":300.0,"b":"SpaArea","f":944.0,"m":"CY"},{"c":"SPA-06","n":"Spa plumbing adder","s":"OPT \u2013 Spa","q":1.0,"u":700.0,"b":"Fixed","f":750.0,"m":"ls"},{"c":"SPA-07","n":"Spa jet pre-plumb (up to 6 jets)","s":"OPT \u2013 Spa","q":1.0,"u":750.0,"b":"Fixed","f":750.0,"m":"ls"},{"c":"SPA-09","n":"Main drain \u2013 spa","s":"OPT \u2013 Spa","q":1.0,"u":125.0,"b":"Fixed","f":115.0,"m":"ea"},{"c":"SPA-10","n":"Spa electrical adder","s":"OPT \u2013 Spa","q":1.0,"u":750.0,"b":"Fixed","f":600.0,"m":"ls"},{"c":"SPA-11","n":"Tile material \u2013 spa","s":"OPT \u2013 Spa","q":44.0,"u":8.0,"b":"SpaPerimeter","f":374.0,"m":"LF"},{"c":"SPA-12","n":"Tile install \u2013 spa","s":"OPT \u2013 Spa","q":40.0,"u":12.0,"b":"SpaPerimeter","f":600.0,"m":"LF"},{"c":"SPA-13","n":"Coping material \u2013 spa","s":"OPT \u2013 Spa","q":30.8,"u":7.0,"b":"SpaPerimeter","f":216.0,"m":"LF"},{"c":"SPA-14","n":"Coping install \u2013 spa","s":"OPT \u2013 Spa","q":28.0,"u":12.0,"b":"SpaPerimeter","f":420.0,"m":"LF"},{"c":"SPA-15","n":"Plaster \u2013 spa (sub incl. material)","s":"OPT \u2013 Spa","q":147.0,"u":5.5,"b":"SpaArea","f":956.0,"m":"sq ft"},{"c":"SPA-16","n":"Spa blower (unit + install)","s":"OPT \u2013 Spa","q":1.0,"u":300.0,"b":"Fixed","f":300.0,"m":"ea"},{"c":"SPA-17","n":"Equipment install adder \u2013 spa","s":"OPT \u2013 Spa","q":1.0,"u":200.0,"b":"Fixed","f":250.0,"m":"ls"},{"c":"HTR-01","n":"Blueprint addendum \u2013 heater","s":"OPT \u2013 Heater","q":1.0,"u":0.0,"b":"Fixed","f":0.0,"m":"ls"},{"c":"HTR-02","n":"Heater \u2013 UltraTemp 140","s":"OPT \u2013 Heater","q":1.0,"u":5800.0,"b":"Fixed","f":5948.0,"m":"ea"},{"c":"HTR-03","n":"Heater install (set & plumb)","s":"OPT \u2013 Heater","q":1.0,"u":0.0,"b":"Fixed","f":800.0,"m":"ls"},{"c":"HTR-04","n":"Heater electrical (breaker + wire)","s":"OPT \u2013 Heater","q":1.0,"u":350.0,"b":"Fixed","f":425.0,"m":"ls"},{"c":"AUT-01","n":"Automation package (unit + install)","s":"OPT \u2013 Automation","q":1.0,"u":2800.0,"b":"Fixed","f":0.0,"m":"ls"},{"c":"WFT-01","n":"Stepping stones \u2013 shotcrete, rebar & finish (5 pads)","s":"OPT \u2013 Water Features","q":1.0,"u":1048.85,"b":"Fixed","f":1050.0,"m":"ls"},{"c":"WFT-02","n":"Stepping stones \u2013 forming & shaping labor","s":"OPT \u2013 Water Features","q":1.0,"u":1500.0,"b":"Fixed","f":900.0,"m":"ls"},{"c":"BAR-01","n":"Baby fence (Redpro) \u2014 FL required","s":"OPT \u2013 Barrier","q":0.0,"u":12.2,"b":"Perimeter","f":1700.0,"m":"LF"}];
 
 const BASE = { L: 60, W: 38, spaL: 7, spaW: 7, waterSF: 1580, markup: 1.3158, baselineBilled: 152330 };
+const SOFT_CAT = 'Soft costs / Design & Permits';
 const CAT_ORDER = [
-  'Design & Permits',
+  SOFT_CAT,
   'Site work',
   'Shell',
   'Plumbing & Electrical',
@@ -1015,7 +1094,8 @@ function lineText(o) {
 }
 
 function categorize(code) {
-  if (code.startsWith('01') || code.startsWith('02')) return 'Design & Permits';
+  if (code.startsWith('01') || code.startsWith('02') || code === 'ENG-01' ||
+      code === 'SPA-01' || code === 'HTR-01') return SOFT_CAT;
   if (code.startsWith('03') || code.startsWith('04')) return 'Site work';
   if (code.startsWith('05') || code.startsWith('06')) return 'Shell';
   if (code.startsWith('07') || code.startsWith('08')) return 'Plumbing & Electrical';
@@ -1083,9 +1163,21 @@ function getParams() {
     owner: $('ownerSupply').checked,
     fee: $('feeModel').value,
     customFee: +$('customFee').value,
-    permitMode: $('permitMode').value
+    permitMode: $('permitMode').value,
+    eng: +$('eng').value,
+    design: +$('design').value,
+    permBldg: +$('permBldg').value,
+    permPlumb: +$('permPlumb').value,
+    permElec: +$('permElec').value,
+    permDerm: +$('permDerm').value,
+    permRunner: +$('permRunner').value
   };
 }
+
+// Soft-cost controls → line codes (each 1 ls; control value = $ lump sum)
+const SOFT_CTRL = { 'ENG-01': 'eng', '01-010': 'design', '01-020': 'permRunner', '02-010': 'permBldg',
+  '02-020': 'permPlumb', '02-030': 'permElec', '02-040': 'permDerm' };
+const PERMIT_PRESETS = { quoted: { permBldg: 2000, permElec: 900 }, actual: { permBldg: 800, permElec: 149 } };
 
 function scaleFor(basis, p, sa, sp) {
   if (!p.spaOn && (basis === 'SpaArea' || basis === 'SpaPerimeter')) return 0;
@@ -1101,7 +1193,7 @@ function scaleFor(basis, p, sa, sp) {
 function compute(p) {
   const catsI = Object.fromEntries(CAT_ORDER.map(c => [c, 0]));
   const catsF = Object.fromEntries(CAT_ORDER.map(c => [c, 0]));
-  let quoted = 0, fair = 0, equip = 0, shell = 0, finish = 0, site = 0, plumb = 0;
+  let quoted = 0, fair = 0, equip = 0, shell = 0, finish = 0, site = 0, plumb = 0, softDesign = 0, softCounty = 0;
 
   let sa = (p.L * p.W) / (BASE.L * BASE.W);
   const sp = (p.L + p.W) / (BASE.L + BASE.W);
@@ -1226,10 +1318,11 @@ function compute(p) {
       } else {
         extI = qty * sf * unitI; extF = row.f * sf; autSave = 2800;
       }
-    } else if (code === '02-010' && p.permitMode === 'actual') {
-      extI = 800; extF = 800;
-    } else if (code === '02-030' && p.permitMode === 'actual') {
-      extI = 149; extF = 149;
+    } else if (SOFT_CTRL[code]) {
+      // Soft costs: left-panel lump-sum $ replaces the quoted unit cost (qty 1 ls)
+      unitI = p[SOFT_CTRL[code]];
+      extI = qty * sf * unitI;
+      extF = code === 'ENG-01' ? extI : row.f * sf; // ENG-01 has no fair data → fair = quoted
     } else {
       extI = qty * sf * unitI;
       extF = row.f * sf;
@@ -1266,6 +1359,8 @@ function compute(p) {
     if (isFinish(code)) finish += extI;
     if (isSite(code)) site += extI;
     if (isPlumbElec(code)) plumb += extI;
+    if (code === 'ENG-01' || code === '01-010' || code === 'SPA-01' || code === 'HTR-01') softDesign += extI;
+    if (code.startsWith('02') || code === '01-020') softCounty += extI;
   }
 
   let billed, feeParts;
@@ -1306,7 +1401,7 @@ function compute(p) {
   return {
     quoted, fair, billed, equip, shell, finish, site, plumb,
     catsI, catsF, feeParts,
-    sa, sp, waterSF, savings, lineOut,
+    sa, sp, waterSF, savings, lineOut, softDesign, softCounty,
     saveVsBaseline: BASE.baselineBilled - billed
   };
 }
@@ -1397,7 +1492,20 @@ function syncOwnerMaster() {
   }
 }
 
+function syncPermitPreset() {
+  const b = +$('permBldg').value, e = +$('permElec').value;
+  let mode = 'custom';
+  for (const [k, v] of Object.entries(PERMIT_PRESETS)) if (v.permBldg === b && v.permElec === e) mode = k;
+  $('permitMode').value = mode;
+}
+function applyPermitPreset(mode) {
+  const v = PERMIT_PRESETS[mode];
+  if (!v) return;
+  for (const k of Object.keys(v)) { $(k).value = v[k]; $(k + 'N').value = v[k]; }
+}
+
 function updateUI() {
+  syncPermitPreset();
   const p = getParams();
   const r = compute(p);
 
@@ -1414,6 +1522,9 @@ function updateUI() {
   $('kFinish').textContent = money(r.finish);
   $('kSite').textContent = money(r.site);
   $('kPlumb').textContent = money(r.plumb);
+  $('softDesign').textContent = money(r.softDesign);
+  $('softCounty').textContent = money(r.softCounty);
+  $('softTotal').textContent = money(r.softDesign + r.softCounty);
 
   const feeNames = {
     quoted: 'Quoted stacked ×1.3158',
@@ -1480,7 +1591,7 @@ function renderLines(lineOut) {
   // Line-item table: Qty + Unit, $/unit, Ext, fair in same unit
   const tb = $('lineRows');
   if (!tb) return;
-  tb.innerHTML = LINES.map(row => {
+  const rowHtml = (row) => {
     const o = lineOut[row.c];
     if (!o) return '';
     const m = row.m;
@@ -1496,9 +1607,18 @@ function renderLines(lineOut) {
     const tag = none ? ' (not included)' : (o.mode === 'owner' ? ' (owner-supply)' : (o.mode === 'actual' ? ' (actual fee)' : ''));
     const tip = row.c + ' ' + row.n + ': ' + fmtQty(o.qty, m) + ' ' + m + ' × ' + up + ' = ' + money(o.ext) +
       ' · fair ' + fu + ' = ' + money(o.extF) + tag + (o.qty === 0 && o.extF > 0 ? ' (fair is a lump allowance; quoted qty is 0 ' + m + ')' : '');
-    return '<tr' + (none ? ' class="off"' : '') + ' title="' + escAttr(tip) + '"><td>' + row.c + '</td><td>' + row.n + tag + '</td><td class="num">' +
+    return '<tr' + (none ? ' class="off"' : '') + ' title="' + escAttr(tip + (row.x ? ' — ' + row.x : '')) + '"><td>' + row.c + '</td><td>' + row.n + tag + '</td><td class="num">' +
       fmtQty(o.qty, m) + '</td><td>' + m + '</td><td class="num">' + up + '</td><td class="num">' + money(o.ext) +
       '</td><td class="num">' + fu + '</td><td class="num">' + money(o.extF) + '</td></tr>';
+  };
+  // Grouped by dashboard category (same buckets as the charts), with category subtotals
+  tb.innerHTML = CAT_ORDER.map(cat => {
+    const rows = LINES.filter(row => categorize(row.c) === cat && lineOut[row.c]);
+    if (!rows.length) return '';
+    const sI = rows.reduce((a, row) => a + lineOut[row.c].ext, 0);
+    const sF = rows.reduce((a, row) => a + lineOut[row.c].extF, 0);
+    return '<tr class="cat"><td colspan="5">' + cat + '</td><td class="num">' + money(sI) + '</td><td></td><td class="num">' + money(sF) + '</td></tr>' +
+      rows.map(rowHtml).join('');
   }).join('');
 }
 
@@ -1532,7 +1652,11 @@ function setAll(vals) {
     rebar: ['rebar', 'rebarN'], forms: ['forms', 'formsN'],
     tileMat: ['tileMat', 'tileMatN'], tileInst: ['tileInst', 'tileInstN'],
     copingMat: ['copingMat', 'copingMatN'], copingInst: ['copingInst', 'copingInstN'],
-    plaster: ['plaster', 'plasterN'], customFee: ['customFee', 'customFeeN']
+    plaster: ['plaster', 'plasterN'], customFee: ['customFee', 'customFeeN'],
+    eng: ['eng', 'engN'], design: ['design', 'designN'],
+    permBldg: ['permBldg', 'permBldgN'], permPlumb: ['permPlumb', 'permPlumbN'],
+    permElec: ['permElec', 'permElecN'], permDerm: ['permDerm', 'permDermN'],
+    permRunner: ['permRunner', 'permRunnerN']
   };
   for (const [k, ids] of Object.entries(map)) {
     if (vals[k] !== undefined) {
@@ -1549,7 +1673,10 @@ function setAll(vals) {
   if (vals.heaterOn !== undefined) $('heaterOn').checked = vals.heaterOn;
   if (vals.owner !== undefined) $('ownerSupply').checked = vals.owner;
   if (vals.fee !== undefined) $('feeModel').value = vals.fee;
-  if (vals.permitMode !== undefined) $('permitMode').value = vals.permitMode;
+  if (vals.permitMode !== undefined) {
+    $('permitMode').value = vals.permitMode;
+    if (vals.permBldg === undefined && vals.permElec === undefined) applyPermitPreset(vals.permitMode);
+  }
   if (vals.plasterGrade !== undefined) $('plasterGrade').value = vals.plasterGrade;
   if (vals.concType !== undefined) $('concType').value = vals.concType;
   if (vals.pumpMode !== undefined) $('pumpMode').value = vals.pumpMode;
@@ -1567,7 +1694,8 @@ const BASELINE = {
   tileMat: 8, tileInst: 12, copingMat: 7, copingInst: 12, plaster: 5, plasterGrade: '1',
   wftOn: true, pumpMode: 'quoted', filterMode: 'quoted', saltOn: true, heaterOn: true,
   autMode: 'quoted', blowerMode: 'quoted', owner: false,
-  fee: 'quoted', customFee: 18, permitMode: 'quoted'
+  fee: 'quoted', customFee: 18, permitMode: 'quoted',
+  eng: 0, design: 2000, permBldg: 2000, permPlumb: 0, permElec: 900, permDerm: 0, permRunner: 0
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1600,12 +1728,20 @@ document.addEventListener('DOMContentLoaded', () => {
   bindPair('copingInst', 'copingInstN', 6, 25, 0.5);
   bindPair('plaster', 'plasterN', 3, 12, 0.25);
   bindPair('customFee', 'customFeeN', 10, 35, 0.5);
+  bindPair('eng', 'engN', 0, 6000, 10);
+  bindPair('design', 'designN', 0, 6000, 10);
+  bindPair('permBldg', 'permBldgN', 0, 4000, 1);
+  bindPair('permPlumb', 'permPlumbN', 0, 1000, 1);
+  bindPair('permElec', 'permElecN', 0, 2000, 1);
+  bindPair('permDerm', 'permDermN', 0, 2000, 1);
+  bindPair('permRunner', 'permRunnerN', 0, 2000, 1);
 
   ['spaOn', 'feeModel', 'ownerSupply', 'gravelOn', 'backfillOn', 'fenceOn',
    'wftOn', 'saltOn', 'heaterOn', 'pumpMode', 'filterMode', 'autMode',
    'blowerMode', 'permitMode', 'plasterGrade', 'concType'].forEach(id => {
     $(id).addEventListener('change', () => {
       if (id === 'ownerSupply') syncOwnerMaster();
+      if (id === 'permitMode') applyPermitPreset($('permitMode').value);
       if (id === 'concType') {
         const v = $('concType').value;
         $('shotcrete').value = v;

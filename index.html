@@ -407,6 +407,11 @@
     line-height: 1.5;
   }
   #customFeeWrap { display: none; }
+  .lineout { font-family: var(--mono); font-size: 0.64rem; color: var(--muted); margin-top: 0.2rem; line-height: 1.35; }
+  .lineout div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lineout.solo { margin: -0.25rem 0 0.5rem 0.2rem; }
+  details.model-notes table.lines td.num, details.model-notes table.lines th.num { text-align: right; font-family: var(--mono); white-space: nowrap; }
+  details.model-notes table.lines tr.off td { opacity: 0.45; }
 
   /* Keep v1 layout feel: left dials always visible as sections, main charts + savings below */
   .sidebar {
@@ -546,20 +551,22 @@
             <input type="range" id="excavMult" min="0.8" max="1.4" step="0.05" value="1.00" />
             <input type="number" id="excavMultN" min="0.8" max="1.4" step="0.05" value="1.00" />
           </div>
+          <div class="lineout" data-codes="04-010"></div>
         </div>
         <div class="param">
-          <label>Haul-off $/load <span class="hint">quoted 200</span></label>
+          <label>Haul-off $/truck <span class="hint">04-050 · quoted $200/truck</span></label>
           <div class="row">
             <input type="range" id="haulLoad" min="120" max="350" step="5" value="200" />
             <input type="number" id="haulLoadN" min="120" max="350" step="5" value="200" />
           </div>
         </div>
         <div class="param">
-          <label>Haul-off multiplier <span class="hint">qty × this</span></label>
+          <label>Haul-off multiplier <span class="hint">truck qty × this</span></label>
           <div class="row">
             <input type="range" id="haulMult" min="0.5" max="1.5" step="0.05" value="1.00" />
             <input type="number" id="haulMultN" min="0.5" max="1.5" step="0.05" value="1.00" />
           </div>
+          <div class="lineout" data-codes="04-050"></div>
         </div>
         <div class="toggle-row">
           <span>Include gravel (04-080)</span>
@@ -570,16 +577,18 @@
           <input type="checkbox" id="backfillOn" checked />
         </div>
         <div class="param">
-          <label>Gravel / backfill mult <span class="hint">when included</span></label>
+          <label>Gravel / backfill mult <span class="hint">truck / ls qty × this</span></label>
           <div class="row">
             <input type="range" id="gravelMult" min="0.5" max="1.5" step="0.05" value="1.00" />
             <input type="number" id="gravelMultN" min="0.5" max="1.5" step="0.05" value="1.00" />
           </div>
+          <div class="lineout" data-codes="04-080,04-060"></div>
         </div>
         <div class="toggle-row">
           <span>Temp fence (03-010)</span>
           <input type="checkbox" id="fenceOn" checked />
         </div>
+        <div class="lineout solo" data-codes="03-010"></div>
       </div>
     </details>
 
@@ -596,32 +605,35 @@
           </select>
         </div>
         <div class="param">
-          <label>Shotcrete $/CY <span class="hint">editable</span></label>
+          <label>Shotcrete $/CY <span class="hint">06-010 · quoted $275/CY</span></label>
           <div class="row">
             <input type="range" id="shotcrete" min="180" max="350" step="5" value="275" />
             <input type="number" id="shotcreteN" min="180" max="350" step="5" value="275" />
           </div>
+          <div class="lineout" data-codes="06-010,SPA-05"></div>
         </div>
         <div class="param">
-          <label>Shell thickness factor <span class="hint">1.0 = engineer baseline</span></label>
+          <label>Shell thickness factor <span class="hint">× CY &amp; rebar LF · 1.0 = baseline</span></label>
           <div class="row">
             <input type="range" id="thick" min="0.85" max="1.25" step="0.01" value="1.00" />
             <input type="number" id="thickN" min="0.85" max="1.25" step="0.01" value="1.00" />
           </div>
         </div>
         <div class="param">
-          <label>Rebar $/lb <span class="hint">quoted 0.60</span></label>
+          <label>Rebar $/LF <span class="hint">05-020 · quoted $0.60/LF</span></label>
           <div class="row">
             <input type="range" id="rebar" min="0.40" max="1.00" step="0.01" value="0.60" />
             <input type="number" id="rebarN" min="0.40" max="1.00" step="0.01" value="0.60" />
           </div>
+          <div class="lineout" data-codes="05-020,SPA-04"></div>
         </div>
         <div class="param">
-          <label>Forms $/LF <span class="hint">quoted 28 · fair ~20</span></label>
+          <label>Forms $/LF <span class="hint">quoted $28/LF · fair ~$20/LF</span></label>
           <div class="row">
             <input type="range" id="forms" min="12" max="35" step="1" value="28" />
             <input type="number" id="formsN" min="12" max="35" step="1" value="28" />
           </div>
+          <div class="lineout" data-codes="05-010,SPA-02"></div>
         </div>
       </div>
     </details>
@@ -631,32 +643,36 @@
       <summary>D · Finish</summary>
       <div class="acc-body">
         <div class="param">
-          <label>Waterline tile $/LF mat <span class="hint">default 8</span></label>
+          <label>Tile material $/LF <span class="hint">09-010 · quoted $8/LF</span></label>
           <div class="row">
             <input type="range" id="tileMat" min="4" max="20" step="0.5" value="8" />
             <input type="number" id="tileMatN" min="4" max="20" step="0.5" value="8" />
           </div>
+          <div class="lineout" data-codes="09-010,SPA-11"></div>
         </div>
         <div class="param">
-          <label>Tile install $/LF <span class="hint">default 12</span></label>
+          <label>Tile install $/LF <span class="hint">09-020 · quoted $12/LF</span></label>
           <div class="row">
             <input type="range" id="tileInst" min="6" max="25" step="0.5" value="12" />
             <input type="number" id="tileInstN" min="6" max="25" step="0.5" value="12" />
           </div>
+          <div class="lineout" data-codes="09-020,SPA-12"></div>
         </div>
         <div class="param">
-          <label>Coping material $/LF <span class="hint">default 7</span></label>
+          <label>Coping material $/LF <span class="hint">09-030 · quoted $7/LF</span></label>
           <div class="row">
             <input type="range" id="copingMat" min="3" max="18" step="0.5" value="7" />
             <input type="number" id="copingMatN" min="3" max="18" step="0.5" value="7" />
           </div>
+          <div class="lineout" data-codes="09-030,SPA-13"></div>
         </div>
         <div class="param">
-          <label>Coping install $/LF <span class="hint">default 12</span></label>
+          <label>Coping install $/LF <span class="hint">09-040 · quoted $12/LF</span></label>
           <div class="row">
             <input type="range" id="copingInst" min="6" max="25" step="0.5" value="12" />
             <input type="number" id="copingInstN" min="6" max="25" step="0.5" value="12" />
           </div>
+          <div class="lineout" data-codes="09-040,SPA-14"></div>
         </div>
         <div class="param">
           <label>Finish grade</label>
@@ -667,16 +683,18 @@
           </select>
         </div>
         <div class="param">
-          <label>Plaster $/SF <span class="hint">base before grade</span></label>
+          <label>Plaster $/sq ft <span class="hint">10-010 · quoted $5/sq ft · before grade</span></label>
           <div class="row">
             <input type="range" id="plaster" min="3" max="12" step="0.25" value="5" />
             <input type="number" id="plasterN" min="3" max="12" step="0.25" value="5" />
           </div>
+          <div class="lineout" data-codes="10-010,SPA-15"></div>
         </div>
         <div class="toggle-row">
           <span>Stepping stones (WFT-01/02)</span>
           <input type="checkbox" id="wftOn" checked />
         </div>
+        <div class="lineout solo" data-codes="WFT-01,WFT-02"></div>
       </div>
     </details>
 
@@ -685,18 +703,19 @@
       <summary>E · Equipment</summary>
       <div class="acc-body">
         <div class="param">
-          <label>LED lights qty <span class="hint">recommended 3</span></label>
+          <label>LED lights qty (ea) <span class="hint">11-040 · recommended 3 ea</span></label>
           <div class="row">
             <input type="range" id="lights" min="0" max="12" step="1" value="9" />
             <input type="number" id="lightsN" min="0" max="12" step="1" value="9" />
           </div>
         </div>
         <div class="param">
-          <label>Light unit $ installed <span class="hint">default 600</span></label>
+          <label>Light $/ea installed <span class="hint">quoted $600/ea</span></label>
           <div class="row">
             <input type="range" id="lightUnit" min="300" max="800" step="10" value="600" />
             <input type="number" id="lightUnitN" min="300" max="800" step="10" value="600" />
           </div>
+          <div class="lineout" data-codes="11-040"></div>
         </div>
         <div class="param">
           <label>Pump package</label>
@@ -705,6 +724,7 @@
             <option value="owner">Owner-supply Stan</option>
             <option value="none">None</option>
           </select>
+          <div class="lineout" data-codes="11-010"></div>
         </div>
         <div class="param">
           <label>Filter</label>
@@ -713,15 +733,18 @@
             <option value="owner">Owner-supply</option>
             <option value="none">None</option>
           </select>
+          <div class="lineout" data-codes="11-020"></div>
         </div>
         <div class="toggle-row">
           <span>Salt system include</span>
           <input type="checkbox" id="saltOn" checked />
         </div>
+        <div class="lineout solo" data-codes="11-030,08-020"></div>
         <div class="toggle-row">
           <span>Heater include (HTR-*)</span>
           <input type="checkbox" id="heaterOn" checked />
         </div>
+        <div class="lineout solo" data-codes="HTR-02,HTR-04"></div>
         <div class="param">
           <label>Automation</label>
           <select id="autMode">
@@ -729,6 +752,7 @@
             <option value="owner">Owner AquaLink credit</option>
             <option value="none">None</option>
           </select>
+          <div class="lineout" data-codes="AUT-01"></div>
         </div>
         <div class="param">
           <label>Blower</label>
@@ -737,6 +761,7 @@
             <option value="owner">Owner-supply</option>
             <option value="none">None</option>
           </select>
+          <div class="lineout" data-codes="SPA-16"></div>
         </div>
         <div class="toggle-row">
           <span>Owner-supply master<br/><span class="hint">pump / filter / blower / AUT credit</span></span>
@@ -771,6 +796,7 @@
             <option value="quoted" selected>Quoted (allowance)</option>
             <option value="actual">Actual Miami-Dade fees</option>
           </select>
+          <div class="lineout" data-codes="02-010,02-030"></div>
         </div>
       </div>
     </details>
@@ -850,6 +876,16 @@
       <ul class="savings-list" id="savingsList"></ul>
     </div>
 
+    <details class="model-notes" id="lineItems">
+      <summary>Line items — Qty · Unit · $/unit · Ext (units as quoted, #26072701)</summary>
+      <div class="body">
+        <table class="lines">
+          <thead><tr><th>Code</th><th>Item</th><th class="num">Qty</th><th>Unit</th><th class="num">Unit price</th><th class="num">Ext</th><th class="num">Fair $/unit</th><th class="num">Fair ext</th></tr></thead>
+          <tbody id="lineRows"></tbody>
+        </table>
+      </div>
+    </details>
+
     <div class="notes-card">
       <h3>Fixed vs Scaled</h3>
       <div class="fixed-scaled">
@@ -890,15 +926,18 @@
         (<code>05-020</code>, <code>SPA-04</code>). When factor &gt; 1.0, forms LF get a small bump:
         <code>×(1 + 0.12×(factor−1))</code>.</p>
         <p><strong>Site work:</strong> excavation intensity multiplies Area <code>04-*</code> lines only.
-        Haul-off unit $/load and multiplier override <code>04-050</code>. Gravel/backfill toggles zero those lines when off.
+        Haul-off $/truck and truck-qty multiplier override <code>04-050</code> (quoted 17 truck × $200/truck). Gravel/backfill toggles zero those lines when off.
         Temp fence toggles <code>03-010</code>.</p>
         <p><strong>Depth / water SF:</strong> avg depth factor scales Area basis (volume proxy). Water SF override replaces
         auto water SF display and rescales Area vs baseline water SF when set &gt; 0.</p>
-        <p><strong>Lights:</strong> quantity × unit $ (default 9 × $600). Recommend 3. Owner-supply master sets unit to $436.</p>
+        <p><strong>Lights:</strong> qty (ea) × $/ea (default 9 ea × $600/ea). Recommend 3 ea. Owner-supply master sets $436/ea.</p>
         <p><strong>Owner-supply (Stan MT Pool):</strong> pump <code>$1,491.30</code>, filter <code>$1,151.41</code>,
         blower <code>$240.42</code>, AUT credit <code>$0</code> (saves $2,800 quoted AquaLink).</p>
         <p><strong>Fair mid:</strong> audit Fair Mid baselines × same scale factors; shotcrete fair $220/CY; forms fair $20/LF
-        (quoted bars use your sliders).</p>
+        (quoted bars use your sliders). Fair $/unit is always shown in the quote's own unit for that line.</p>
+        <p><strong>Units:</strong> every line carries its unit of measure exactly as written in Indigo's Budget sheet —
+        <code>ls</code> (lump sum), <code>LF</code>, <code>sq ft</code>, <code>CY</code>, <code>truck</code> (truckload), <code>ea</code>.
+        Rebar is priced per <code>LF</code> ($0.60/LF), not per lb.</p>
         <p><strong>Permits:</strong> Quoted uses line allowances; Actual Miami-Dade uses published ~$800 building / ~$149 electrical.</p>
         <table>
           <tr><th>Validation</th><th>Scaled Quoted Direct</th><th>Equipment</th></tr>
@@ -918,7 +957,8 @@
 </div>
 
 <script>
-const LINES = [{"c":"01-010","n":"Blueprints \u2013 standard pool","s":"01 Design & Engineering","q":1.0,"u":2000.0,"b":"Fixed","f":1150.0},{"c":"01-020","n":"Permit runner / expediting","s":"01 Design & Engineering","q":1.0,"u":0.0,"b":"Fixed","f":750.0},{"c":"02-010","n":"Building permit","s":"02 Permits","q":1.0,"u":2000.0,"b":"Fixed","f":800.0},{"c":"02-020","n":"Plumbing permit","s":"02 Permits","q":1.0,"u":0.0,"b":"Fixed","f":125.0},{"c":"02-030","n":"Electrical permit","s":"02 Permits","q":1.0,"u":900.0,"b":"Fixed","f":149.0},{"c":"02-040","n":"DERM / zoning allowance","s":"02 Permits","q":1.0,"u":0.0,"b":"Fixed","f":500.0},{"c":"03-010","n":"Temp safety + silt fencing","s":"03 Site Prep","q":238.0,"u":3.0,"b":"Perimeter","f":1190.0},{"c":"04-010","n":"Excavation \u2013 dig & load","s":"04 Excavation & Hauling","q":1580.0,"u":4.5,"b":"Area","f":5925.0},{"c":"04-050","n":"Dirt haul-off","s":"04 Excavation & Hauling","q":17.0,"u":200.0,"b":"Area","f":8075.0},{"c":"04-060","n":"Backfill & rough grading","s":"04 Excavation & Hauling","q":3.0,"u":700.0,"b":"Area","f":2250.0},{"c":"04-070","n":"Compaction","s":"04 Excavation & Hauling","q":1.0,"u":500.0,"b":"Fixed","f":550.0},{"c":"04-080","n":"Gravel","s":"04 Excavation & Hauling","q":2.0,"u":650.0,"b":"Area","f":2900.0},{"c":"05-010","n":"Forms \u2013 pool (sub)","s":"05 Forms & Rebar","q":218.0,"u":28.0,"b":"Perimeter","f":4033.0},{"c":"05-020","n":"Rebar material \u2013 pool","s":"05 Forms & Rebar","q":6776.04,"u":0.6,"b":"Area","f":3896.0},{"c":"05-030","n":"Steps & sunshelf forming","s":"05 Forms & Rebar","q":1.0,"u":1000.0,"b":"Fixed","f":1125.0},{"c":"06-010","n":"Shotcrete ALL-IN \u2013 pool","s":"06 Shotcrete Shell","q":78.46,"u":275.0,"b":"Area","f":16869.0},{"c":"07-010","n":"Pool plumbing rough & pressure test","s":"07 Plumbing","q":1.0,"u":2000.0,"b":"Fixed","f":2250.0},{"c":"07-020","n":"Main drain \u2013 pool","s":"07 Plumbing","q":1.0,"u":125.0,"b":"Fixed","f":115.0},{"c":"07-030","n":"Sunshelf plumbing","s":"07 Plumbing","q":2.0,"u":150.0,"b":"Fixed","f":300.0},{"c":"07-040","n":"Trench \u2013 equipment run","s":"07 Plumbing","q":1.0,"u":1000.0,"b":"Fixed","f":1000.0},{"c":"07-050","n":"Additional lines up to 3\"","s":"07 Plumbing","q":6.0,"u":100.0,"b":"Fixed","f":540.0},{"c":"07-060","n":"Additional valves / actuators","s":"07 Plumbing","q":6.0,"u":75.0,"b":"Fixed","f":600.0},{"c":"08-010","n":"Pool electrical package","s":"08 Electrical","q":1.0,"u":4000.0,"b":"Fixed","f":3500.0},{"c":"08-020","n":"Salt system hook-up","s":"08 Electrical","q":1.0,"u":100.0,"b":"Fixed","f":137.5},{"c":"08-030","n":"Heater-ready provision","s":"08 Electrical","q":1.0,"u":100.0,"b":"Fixed","f":162.5},{"c":"09-010","n":"Tile material \u2013 pool","s":"09 Tile & Coping","q":332.2,"u":8.0,"b":"Perimeter","f":2824.0},{"c":"09-020","n":"Tile install \u2013 pool","s":"09 Tile & Coping","q":302.0,"u":12.0,"b":"Perimeter","f":4530.0},{"c":"09-030","n":"Coping material \u2013 pool","s":"09 Tile & Coping","q":235.4,"u":7.0,"b":"Perimeter","f":1648.0},{"c":"09-040","n":"Coping install \u2013 pool","s":"09 Tile & Coping","q":214.0,"u":12.0,"b":"Perimeter","f":3210.0},{"c":"10-010","n":"Plaster \u2013 pool (sub incl. material)","s":"10 Plaster & Startup","q":2030.79,"u":5.0,"b":"Area","f":13200.0},{"c":"10-030","n":"Pool startup & chemicals (1 week)","s":"10 Plaster & Startup","q":1.0,"u":500.0,"b":"Fixed","f":550.0},{"c":"11-010","n":"Pump \u2013 IntelliFlo3 VSF","s":"11 Equipment","q":1.0,"u":1978.52,"b":"Fixed","f":1869.0},{"c":"11-020","n":"Filter \u2013 CCP 420","s":"11 Equipment","q":1.0,"u":1900.0,"b":"Fixed","f":1510.0},{"c":"11-030","n":"Salt system \u2013 IntelliChlor+ 40k","s":"11 Equipment","q":1.0,"u":1900.0,"b":"Fixed","f":2175.0},{"c":"11-040","n":"Pool lights (LED, installed)","s":"11 Equipment","q":9.0,"u":600.0,"b":"Fixed","f":1650.0},{"c":"11-050","n":"White goods & misc allowance","s":"11 Equipment","q":1.0,"u":700.0,"b":"Fixed","f":600.0},{"c":"11-060","n":"Equipment install labor \u2013 pool","s":"11 Equipment","q":1.0,"u":900.0,"b":"Fixed","f":1125.0},{"c":"SPA-02","n":"Forms \u2013 spa (sub)","s":"OPT \u2013 Spa","q":32.0,"u":28.0,"b":"SpaPerimeter","f":640.0},{"c":"SPA-03","n":"Spa form adder (raised walls)","s":"OPT \u2013 Spa","q":1.0,"u":1500.0,"b":"Fixed","f":1500.0},{"c":"SPA-04","n":"Rebar material \u2013 spa","s":"OPT \u2013 Spa","q":328.94,"u":0.6,"b":"SpaArea","f":189.0},{"c":"SPA-05","n":"Shotcrete ALL-IN \u2013 spa","s":"OPT \u2013 Spa","q":4.29,"u":300.0,"b":"SpaArea","f":944.0},{"c":"SPA-06","n":"Spa plumbing adder","s":"OPT \u2013 Spa","q":1.0,"u":700.0,"b":"Fixed","f":750.0},{"c":"SPA-07","n":"Spa jet pre-plumb (up to 6 jets)","s":"OPT \u2013 Spa","q":1.0,"u":750.0,"b":"Fixed","f":750.0},{"c":"SPA-09","n":"Main drain \u2013 spa","s":"OPT \u2013 Spa","q":1.0,"u":125.0,"b":"Fixed","f":115.0},{"c":"SPA-10","n":"Spa electrical adder","s":"OPT \u2013 Spa","q":1.0,"u":750.0,"b":"Fixed","f":600.0},{"c":"SPA-11","n":"Tile material \u2013 spa","s":"OPT \u2013 Spa","q":44.0,"u":8.0,"b":"SpaPerimeter","f":374.0},{"c":"SPA-12","n":"Tile install \u2013 spa","s":"OPT \u2013 Spa","q":40.0,"u":12.0,"b":"SpaPerimeter","f":600.0},{"c":"SPA-13","n":"Coping material \u2013 spa","s":"OPT \u2013 Spa","q":30.8,"u":7.0,"b":"SpaPerimeter","f":216.0},{"c":"SPA-14","n":"Coping install \u2013 spa","s":"OPT \u2013 Spa","q":28.0,"u":12.0,"b":"SpaPerimeter","f":420.0},{"c":"SPA-15","n":"Plaster \u2013 spa (sub incl. material)","s":"OPT \u2013 Spa","q":147.0,"u":5.5,"b":"SpaArea","f":956.0},{"c":"SPA-16","n":"Spa blower (unit + install)","s":"OPT \u2013 Spa","q":1.0,"u":300.0,"b":"Fixed","f":300.0},{"c":"SPA-17","n":"Equipment install adder \u2013 spa","s":"OPT \u2013 Spa","q":1.0,"u":200.0,"b":"Fixed","f":250.0},{"c":"HTR-02","n":"Heater \u2013 UltraTemp 140","s":"OPT \u2013 Heater","q":1.0,"u":5800.0,"b":"Fixed","f":5948.0},{"c":"HTR-03","n":"Heater install (set & plumb)","s":"OPT \u2013 Heater","q":1.0,"u":0.0,"b":"Fixed","f":800.0},{"c":"HTR-04","n":"Heater electrical (breaker + wire)","s":"OPT \u2013 Heater","q":1.0,"u":350.0,"b":"Fixed","f":425.0},{"c":"AUT-01","n":"Automation package (unit + install)","s":"OPT \u2013 Automation","q":1.0,"u":2800.0,"b":"Fixed","f":0.0},{"c":"WFT-01","n":"Stepping stones \u2013 shotcrete, rebar & finish (5 pads)","s":"OPT \u2013 Water Features","q":1.0,"u":1048.85,"b":"Fixed","f":1050.0},{"c":"WFT-02","n":"Stepping stones \u2013 forming & shaping labor","s":"OPT \u2013 Water Features","q":1.0,"u":1500.0,"b":"Fixed","f":900.0},{"c":"BAR-01","n":"Baby fence (Redpro) \u2014 FL required","s":"OPT \u2013 Barrier","q":0.0,"u":12.2,"b":"Perimeter","f":1700.0}];
+// Line data: c=code, n=item, s=section, q=quoted qty, u=quoted unit cost ($ per m), m=unit of measure exactly as Indigo Quote #26072701 Budget sheet (ls, LF, sq ft, truck, ea, CY), b=scale basis, f=fair-mid ext $ for qty q (so fair $/unit = f/q, same unit m)
+const LINES = [{"c":"01-010","n":"Blueprints \u2013 standard pool","s":"01 Design & Engineering","q":1.0,"u":2000.0,"b":"Fixed","f":1150.0,"m":"ls"},{"c":"01-020","n":"Permit runner / expediting","s":"01 Design & Engineering","q":1.0,"u":0.0,"b":"Fixed","f":750.0,"m":"ls"},{"c":"02-010","n":"Building permit","s":"02 Permits","q":1.0,"u":2000.0,"b":"Fixed","f":800.0,"m":"ls"},{"c":"02-020","n":"Plumbing permit","s":"02 Permits","q":1.0,"u":0.0,"b":"Fixed","f":125.0,"m":"ls"},{"c":"02-030","n":"Electrical permit","s":"02 Permits","q":1.0,"u":900.0,"b":"Fixed","f":149.0,"m":"ls"},{"c":"02-040","n":"DERM / zoning allowance","s":"02 Permits","q":1.0,"u":0.0,"b":"Fixed","f":500.0,"m":"ls"},{"c":"03-010","n":"Temp safety + silt fencing","s":"03 Site Prep","q":238.0,"u":3.0,"b":"Perimeter","f":1190.0,"m":"LF"},{"c":"04-010","n":"Excavation \u2013 dig & load","s":"04 Excavation & Hauling","q":1580.0,"u":4.5,"b":"Area","f":5925.0,"m":"sq ft"},{"c":"04-050","n":"Dirt haul-off","s":"04 Excavation & Hauling","q":17.0,"u":200.0,"b":"Area","f":8075.0,"m":"truck"},{"c":"04-060","n":"Backfill & rough grading","s":"04 Excavation & Hauling","q":3.0,"u":700.0,"b":"Area","f":2250.0,"m":"ls"},{"c":"04-070","n":"Compaction","s":"04 Excavation & Hauling","q":1.0,"u":500.0,"b":"Fixed","f":550.0,"m":"ls"},{"c":"04-080","n":"Gravel","s":"04 Excavation & Hauling","q":2.0,"u":650.0,"b":"Area","f":2900.0,"m":"truck"},{"c":"05-010","n":"Forms \u2013 pool (sub)","s":"05 Forms & Rebar","q":218.0,"u":28.0,"b":"Perimeter","f":4033.0,"m":"LF"},{"c":"05-020","n":"Rebar material \u2013 pool","s":"05 Forms & Rebar","q":6776.04,"u":0.6,"b":"Area","f":3896.0,"m":"LF"},{"c":"05-030","n":"Steps & sunshelf forming","s":"05 Forms & Rebar","q":1.0,"u":1000.0,"b":"Fixed","f":1125.0,"m":"ls"},{"c":"06-010","n":"Shotcrete ALL-IN \u2013 pool","s":"06 Shotcrete Shell","q":78.46,"u":275.0,"b":"Area","f":16869.0,"m":"CY"},{"c":"07-010","n":"Pool plumbing rough & pressure test","s":"07 Plumbing","q":1.0,"u":2000.0,"b":"Fixed","f":2250.0,"m":"ls"},{"c":"07-020","n":"Main drain \u2013 pool","s":"07 Plumbing","q":1.0,"u":125.0,"b":"Fixed","f":115.0,"m":"ea"},{"c":"07-030","n":"Sunshelf plumbing","s":"07 Plumbing","q":2.0,"u":150.0,"b":"Fixed","f":300.0,"m":"ls"},{"c":"07-040","n":"Trench \u2013 equipment run","s":"07 Plumbing","q":1.0,"u":1000.0,"b":"Fixed","f":1000.0,"m":"ls"},{"c":"07-050","n":"Additional lines up to 3\"","s":"07 Plumbing","q":6.0,"u":100.0,"b":"Fixed","f":540.0,"m":"ea"},{"c":"07-060","n":"Additional valves / actuators","s":"07 Plumbing","q":6.0,"u":75.0,"b":"Fixed","f":600.0,"m":"ea"},{"c":"08-010","n":"Pool electrical package","s":"08 Electrical","q":1.0,"u":4000.0,"b":"Fixed","f":3500.0,"m":"ls"},{"c":"08-020","n":"Salt system hook-up","s":"08 Electrical","q":1.0,"u":100.0,"b":"Fixed","f":137.5,"m":"ls"},{"c":"08-030","n":"Heater-ready provision","s":"08 Electrical","q":1.0,"u":100.0,"b":"Fixed","f":162.5,"m":"ls"},{"c":"09-010","n":"Tile material \u2013 pool","s":"09 Tile & Coping","q":332.2,"u":8.0,"b":"Perimeter","f":2824.0,"m":"LF"},{"c":"09-020","n":"Tile install \u2013 pool","s":"09 Tile & Coping","q":302.0,"u":12.0,"b":"Perimeter","f":4530.0,"m":"LF"},{"c":"09-030","n":"Coping material \u2013 pool","s":"09 Tile & Coping","q":235.4,"u":7.0,"b":"Perimeter","f":1648.0,"m":"LF"},{"c":"09-040","n":"Coping install \u2013 pool","s":"09 Tile & Coping","q":214.0,"u":12.0,"b":"Perimeter","f":3210.0,"m":"LF"},{"c":"10-010","n":"Plaster \u2013 pool (sub incl. material)","s":"10 Plaster & Startup","q":2030.79,"u":5.0,"b":"Area","f":13200.0,"m":"sq ft"},{"c":"10-030","n":"Pool startup & chemicals (1 week)","s":"10 Plaster & Startup","q":1.0,"u":500.0,"b":"Fixed","f":550.0,"m":"ls"},{"c":"11-010","n":"Pump \u2013 IntelliFlo3 VSF","s":"11 Equipment","q":1.0,"u":1978.52,"b":"Fixed","f":1869.0,"m":"ea"},{"c":"11-020","n":"Filter \u2013 CCP 420","s":"11 Equipment","q":1.0,"u":1900.0,"b":"Fixed","f":1510.0,"m":"ea"},{"c":"11-030","n":"Salt system \u2013 IntelliChlor+ 40k","s":"11 Equipment","q":1.0,"u":1900.0,"b":"Fixed","f":2175.0,"m":"ea"},{"c":"11-040","n":"Pool lights (LED, installed)","s":"11 Equipment","q":9.0,"u":600.0,"b":"Fixed","f":1650.0,"m":"ea"},{"c":"11-050","n":"White goods & misc allowance","s":"11 Equipment","q":1.0,"u":700.0,"b":"Fixed","f":600.0,"m":"ls"},{"c":"11-060","n":"Equipment install labor \u2013 pool","s":"11 Equipment","q":1.0,"u":900.0,"b":"Fixed","f":1125.0,"m":"ls"},{"c":"SPA-02","n":"Forms \u2013 spa (sub)","s":"OPT \u2013 Spa","q":32.0,"u":28.0,"b":"SpaPerimeter","f":640.0,"m":"LF"},{"c":"SPA-03","n":"Spa form adder (raised walls)","s":"OPT \u2013 Spa","q":1.0,"u":1500.0,"b":"Fixed","f":1500.0,"m":"ls"},{"c":"SPA-04","n":"Rebar material \u2013 spa","s":"OPT \u2013 Spa","q":328.94,"u":0.6,"b":"SpaArea","f":189.0,"m":"LF"},{"c":"SPA-05","n":"Shotcrete ALL-IN \u2013 spa","s":"OPT \u2013 Spa","q":4.29,"u":300.0,"b":"SpaArea","f":944.0,"m":"CY"},{"c":"SPA-06","n":"Spa plumbing adder","s":"OPT \u2013 Spa","q":1.0,"u":700.0,"b":"Fixed","f":750.0,"m":"ls"},{"c":"SPA-07","n":"Spa jet pre-plumb (up to 6 jets)","s":"OPT \u2013 Spa","q":1.0,"u":750.0,"b":"Fixed","f":750.0,"m":"ls"},{"c":"SPA-09","n":"Main drain \u2013 spa","s":"OPT \u2013 Spa","q":1.0,"u":125.0,"b":"Fixed","f":115.0,"m":"ea"},{"c":"SPA-10","n":"Spa electrical adder","s":"OPT \u2013 Spa","q":1.0,"u":750.0,"b":"Fixed","f":600.0,"m":"ls"},{"c":"SPA-11","n":"Tile material \u2013 spa","s":"OPT \u2013 Spa","q":44.0,"u":8.0,"b":"SpaPerimeter","f":374.0,"m":"LF"},{"c":"SPA-12","n":"Tile install \u2013 spa","s":"OPT \u2013 Spa","q":40.0,"u":12.0,"b":"SpaPerimeter","f":600.0,"m":"LF"},{"c":"SPA-13","n":"Coping material \u2013 spa","s":"OPT \u2013 Spa","q":30.8,"u":7.0,"b":"SpaPerimeter","f":216.0,"m":"LF"},{"c":"SPA-14","n":"Coping install \u2013 spa","s":"OPT \u2013 Spa","q":28.0,"u":12.0,"b":"SpaPerimeter","f":420.0,"m":"LF"},{"c":"SPA-15","n":"Plaster \u2013 spa (sub incl. material)","s":"OPT \u2013 Spa","q":147.0,"u":5.5,"b":"SpaArea","f":956.0,"m":"sq ft"},{"c":"SPA-16","n":"Spa blower (unit + install)","s":"OPT \u2013 Spa","q":1.0,"u":300.0,"b":"Fixed","f":300.0,"m":"ea"},{"c":"SPA-17","n":"Equipment install adder \u2013 spa","s":"OPT \u2013 Spa","q":1.0,"u":200.0,"b":"Fixed","f":250.0,"m":"ls"},{"c":"HTR-02","n":"Heater \u2013 UltraTemp 140","s":"OPT \u2013 Heater","q":1.0,"u":5800.0,"b":"Fixed","f":5948.0,"m":"ea"},{"c":"HTR-03","n":"Heater install (set & plumb)","s":"OPT \u2013 Heater","q":1.0,"u":0.0,"b":"Fixed","f":800.0,"m":"ls"},{"c":"HTR-04","n":"Heater electrical (breaker + wire)","s":"OPT \u2013 Heater","q":1.0,"u":350.0,"b":"Fixed","f":425.0,"m":"ls"},{"c":"AUT-01","n":"Automation package (unit + install)","s":"OPT \u2013 Automation","q":1.0,"u":2800.0,"b":"Fixed","f":0.0,"m":"ls"},{"c":"WFT-01","n":"Stepping stones \u2013 shotcrete, rebar & finish (5 pads)","s":"OPT \u2013 Water Features","q":1.0,"u":1048.85,"b":"Fixed","f":1050.0,"m":"ls"},{"c":"WFT-02","n":"Stepping stones \u2013 forming & shaping labor","s":"OPT \u2013 Water Features","q":1.0,"u":1500.0,"b":"Fixed","f":900.0,"m":"ls"},{"c":"BAR-01","n":"Baby fence (Redpro) \u2014 FL required","s":"OPT \u2013 Barrier","q":0.0,"u":12.2,"b":"Perimeter","f":1700.0,"m":"LF"}];
 
 const BASE = { L: 60, W: 38, spaL: 7, spaW: 7, waterSF: 1580, markup: 1.3158, baselineBilled: 152330 };
 const CAT_ORDER = [
@@ -943,6 +983,36 @@ function money(n) {
   return (neg ? '-$' : '$') + a.toLocaleString('en-US');
 }
 function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+
+// ---- Units of measure (as quoted) ----
+function fmtQty(q, m) {
+  let d;
+  if (m === 'CY') d = 2;
+  else if (Math.abs(q - Math.round(q)) < 0.005 || Math.abs(q) >= 1000) d = 0;
+  else d = 2;
+  const s = q.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+  return d === 2 && m !== 'CY' ? s.replace(/0$/, '') : s;
+}
+function money2(n) {
+  const neg = n < 0, a = Math.abs(n);
+  let d;
+  if (a > 0 && a < 1) d = (Math.abs(a * 100 - Math.round(a * 100)) < 1e-6) ? 2 : 3;
+  else d = (Math.abs(a - Math.round(a)) < 0.005) ? 0 : 2;
+  return (neg ? '-$' : '$') + a.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+// "$28/LF", "$4.50/sq ft", "$200/truck", "$275/CY", "$600/ea"; ls with qty 1 → "$2,000 lump sum"
+function unitPrice(u, m, q) {
+  if (m === 'ls' && (q === undefined || Math.abs(q - 1) < 1e-9)) return money2(u) + ' lump sum';
+  return money2(u) + '/' + m;
+}
+function lineText(o) {
+  const r = o.row;
+  if (o.off) return r.c + ' off · quoted ' + fmtQty(r.q, r.m) + ' ' + r.m + ' × ' + unitPrice(r.u, r.m, r.q);
+  if (o.mode === 'none') return r.c + ' not included (' + r.m + ')';
+  const tag = o.mode === 'owner' ? ' (owner)' : (o.mode === 'actual' ? ' (actual)' : '');
+  if (r.m === 'ls' && Math.abs(o.qty - 1) < 1e-9) return r.c + ' 1 ls · ' + unitPrice(o.unit, r.m, o.qty) + tag;
+  return r.c + ' ' + fmtQty(o.qty, r.m) + ' ' + r.m + ' × ' + unitPrice(o.unit, r.m, o.qty) + ' = ' + money(o.ext) + tag;
+}
 
 function categorize(code) {
   if (code.startsWith('01') || code.startsWith('02')) return 'Design & Permits';
@@ -1049,15 +1119,18 @@ function compute(p) {
   let lightsQuoted = 0, permitBldg = 0, permitElec = 0, blueprints = 0;
   let pumpSave = 0, filterSave = 0, autSave = 0;
 
+  const lineOut = {};
   for (const row of LINES) {
     const code = row.c;
-    if (code.startsWith('SPA') && !p.spaOn) continue;
-    if ((code.startsWith('HTR') || code === '08-030') && !p.heaterOn) continue;
-    if ((code === '11-030' || code === '08-020') && !p.saltOn) continue;
-    if ((code === 'WFT-01' || code === 'WFT-02') && !p.wftOn) continue;
-    if (code === '03-010' && !p.fenceOn) continue;
-    if (code === '04-080' && !p.gravelOn) continue;
-    if (code === '04-060' && !p.backfillOn) continue;
+    const off =
+      (code.startsWith('SPA') && !p.spaOn) ||
+      ((code.startsWith('HTR') || code === '08-030') && !p.heaterOn) ||
+      ((code === '11-030' || code === '08-020') && !p.saltOn) ||
+      ((code === 'WFT-01' || code === 'WFT-02') && !p.wftOn) ||
+      (code === '03-010' && !p.fenceOn) ||
+      (code === '04-080' && !p.gravelOn) ||
+      (code === '04-060' && !p.backfillOn);
+    if (off) { lineOut[code] = { row, off: true, qty: 0, unit: row.u, ext: 0, extF: 0 }; continue; }
 
     const sf = scaleFor(row.b, p, sa, sp);
     let qty = row.q;
@@ -1162,6 +1235,23 @@ function compute(p) {
       extF = row.f * sf;
     }
 
+    // Record line with qty in the quote's unit of measure (row.m) and effective $/unit so qty × $/unit = ext
+    {
+      const dq = code === '11-040' ? qty : qty * sf;
+      let mode = '';
+      if ((code === '11-010' && p.pumpMode !== 'quoted') || (code === '11-020' && p.filterMode !== 'quoted') ||
+          (code === 'SPA-16' && p.blowerMode !== 'quoted') || (code === 'AUT-01' && p.autMode !== 'quoted')) {
+        mode = { '11-010': p.pumpMode, '11-020': p.filterMode, 'SPA-16': p.blowerMode, 'AUT-01': p.autMode }[code];
+      }
+      if ((code === '02-010' || code === '02-030') && p.permitMode === 'actual') mode = 'actual';
+      lineOut[code] = {
+        row, off: false, mode, qty: dq,
+        unit: dq > 0 ? extI / dq : unitI,
+        ext: extI, extF,
+        fairUnit: dq > 0 ? extF / dq : (row.q > 0 ? row.f / row.q : null)
+      };
+    }
+
     if (code === '02-010') permitBldg = extI - 800;
     if (code === '02-030') permitElec = extI - 149;
     if (code === '01-010') blueprints = extI - 1200;
@@ -1195,24 +1285,28 @@ function compute(p) {
   const lightSave = Math.max(0, lightsQuoted - (3 * (p.owner ? 436 : Math.min(p.lightUnit, 550))));
   const shotSave = Math.max(0, shotcreteQuoted - shotcreteFair);
   const formSave = Math.max(0, formsQuoted - formsFair);
+  const LO = lineOut;
+  const formsLF = (LO['05-010'] ? LO['05-010'].qty : 0) + (LO['SPA-02'] && !LO['SPA-02'].off ? LO['SPA-02'].qty : 0);
+  const lumpNote = (c) => LO[c] && !LO[c].off ? '1 ls · ' + unitPrice(LO[c].unit, 'ls', LO[c].qty) + ' now' : '';
+  const eaNote = (c) => LO[c] && !LO[c].off && LO[c].mode !== 'none' ? fmtQty(LO[c].qty, 'ea') + ' ea × ' + money2(LO[c].unit) + '/ea now' : 'not included';
   const savings = [
-    { rank: 1, item: 'LED lights → 3 practical', save: lightSave, note: p.lights + ' lights now' },
-    { rank: 2, item: 'Shotcrete → ~$220/CY', save: shotSave, note: '$' + p.shotcrete + '/CY now' },
-    { rank: 3, item: 'Building permit → published ~$800', save: Math.max(0, permitBldg), note: 'Miami-Dade IO 4-63' },
-    { rank: 4, item: 'Forms → ~$20/LF', save: formSave, note: '$' + p.forms + '/LF now' },
-    { rank: 5, item: 'Electrical permit → ~$149', save: Math.max(0, permitElec), note: 'IO 4-63' },
-    { rank: 6, item: 'Filter → Stan Jandy $1,151', save: Math.max(0, filterSave), note: p.filterMode === 'owner' ? 'credited' : 'owner-supply' },
-    { rank: 7, item: 'Blueprints → ~$1,200 PE', save: Math.max(0, blueprints), note: 'compete package' },
-    { rank: 8, item: 'Pump → Stan FloPro $1,491', save: Math.max(0, pumpSave), note: p.pumpMode === 'owner' ? 'credited' : 'owner-supply' },
-    { rank: 9, item: 'AUT-01 AquaLink credit $2,800', save: p.autMode === 'owner' ? 0 : (p.autMode === 'quoted' ? autSave : 0), note: p.autMode === 'owner' ? 'already credited' : "don't pay twice" },
-    { rank: 10, item: 'Elec pkg / load-center deduct', save: (p.pumpMode === 'owner' || p.owner) ? 0 : 500, note: 'Stan Intermatic ~$299' }
+    { rank: 1, item: 'LED lights → 3 ea practical', save: lightSave, note: p.lights + ' ea × ' + money2(p.owner ? 436 : p.lightUnit) + '/ea now' },
+    { rank: 2, item: 'Shotcrete → ~$220/CY', save: shotSave, note: fmtQty(LO['06-010'].qty, 'CY') + ' CY × $' + p.shotcrete + '/CY now' },
+    { rank: 3, item: 'Building permit → published ~$800 lump sum', save: Math.max(0, permitBldg), note: lumpNote('02-010') + ' · Miami-Dade IO 4-63' },
+    { rank: 4, item: 'Forms → ~$20/LF', save: formSave, note: fmtQty(formsLF, 'LF') + ' LF × $' + p.forms + '/LF now' },
+    { rank: 5, item: 'Electrical permit → ~$149 lump sum', save: Math.max(0, permitElec), note: lumpNote('02-030') + ' · IO 4-63' },
+    { rank: 6, item: 'Filter → Stan Jandy $1,151/ea', save: Math.max(0, filterSave), note: (p.filterMode === 'owner' ? 'credited · ' : 'owner-supply · ') + eaNote('11-020') },
+    { rank: 7, item: 'Blueprints → ~$1,200 PE lump sum', save: Math.max(0, blueprints), note: lumpNote('01-010') + ' · compete package' },
+    { rank: 8, item: 'Pump → Stan FloPro $1,491/ea', save: Math.max(0, pumpSave), note: (p.pumpMode === 'owner' ? 'credited · ' : 'owner-supply · ') + eaNote('11-010') },
+    { rank: 9, item: 'AUT-01 AquaLink credit $2,800 lump sum', save: p.autMode === 'owner' ? 0 : (p.autMode === 'quoted' ? autSave : 0), note: p.autMode === 'owner' ? 'already credited' : "1 ls · $2,800 lump sum · don't pay twice" },
+    { rank: 10, item: '08-010 Elec pkg / load-center deduct', save: (p.pumpMode === 'owner' || p.owner) ? 0 : 500, note: lumpNote('08-010') + ' · Stan Intermatic ~$299' }
   ].filter(x => x.save > 25).sort((a, b) => b.save - a.save).slice(0, 8)
    .map((x, i) => ({ ...x, rank: i + 1 }));
 
   return {
     quoted, fair, billed, equip, shell, finish, site, plumb,
     catsI, catsF, feeParts,
-    sa, sp, waterSF, savings,
+    sa, sp, waterSF, savings, lineOut,
     saveVsBaseline: BASE.baselineBilled - billed
   };
 }
@@ -1267,7 +1361,7 @@ function initCharts() {
     data: {
       labels: CAT_ORDER,
       datasets: [
-        { label: 'Quoted unit cost', data: CAT_ORDER.map(() => 0), backgroundColor: '#818cf8' },
+        { label: 'Quoted ext cost', data: CAT_ORDER.map(() => 0), backgroundColor: '#818cf8' },
         { label: 'Fair Mid', data: CAT_ORDER.map(() => 0), backgroundColor: '#2dd4bf' }
       ]
     },
@@ -1371,6 +1465,41 @@ function updateUI() {
         `<li><span class="rank">#${s.rank}</span><span><strong>${s.item}</strong><br/><span style="color:var(--muted);font-size:.72rem">${s.note}</span></span><span class="amt">${money(s.save)} cost</span></li>`
       ).join('')
     : '<li style="grid-column:1/-1;color:var(--muted)">No material savings left at these settings — already lean.</li>';
+
+  renderLines(r.lineOut);
+}
+
+function escAttr(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+function renderLines(lineOut) {
+  // Left-panel readouts: resulting line(s) in the quote's unit
+  document.querySelectorAll('.lineout[data-codes]').forEach(el => {
+    el.innerHTML = el.dataset.codes.split(',')
+      .map(c => lineOut[c] ? '<div title="' + escAttr(lineOut[c].row.n + ': ' + lineText(lineOut[c])) + '">' + lineText(lineOut[c]) + '</div>' : '')
+      .join('');
+  });
+  // Line-item table: Qty + Unit, $/unit, Ext, fair in same unit
+  const tb = $('lineRows');
+  if (!tb) return;
+  tb.innerHTML = LINES.map(row => {
+    const o = lineOut[row.c];
+    if (!o) return '';
+    const m = row.m;
+    if (o.off) {
+      const tip = row.c + ' ' + row.n + ' — off · quoted ' + fmtQty(row.q, m) + ' ' + m + ' × ' + unitPrice(row.u, m, row.q);
+      return '<tr class="off" title="' + escAttr(tip) + '"><td>' + row.c + '</td><td>' + row.n + '</td><td class="num">—</td><td>' + m +
+        '</td><td class="num">' + unitPrice(row.u, m, row.q) + '</td><td class="num">off</td><td class="num">—</td><td class="num">—</td></tr>';
+    }
+    const none = o.mode === 'none';
+    const up = none ? '—' : unitPrice(o.unit, m, o.qty);
+    // qty 0 with a fair $ (BAR-01) = fair lump allowance, not expressible per unit
+    const fu = none ? '—' : (o.qty === 0 && o.extF > 0 ? 'allowance' : (o.fairUnit === null || o.fairUnit === undefined ? '—' : unitPrice(o.fairUnit, m, o.qty)));
+    const tag = none ? ' (not included)' : (o.mode === 'owner' ? ' (owner-supply)' : (o.mode === 'actual' ? ' (actual fee)' : ''));
+    const tip = row.c + ' ' + row.n + ': ' + fmtQty(o.qty, m) + ' ' + m + ' × ' + up + ' = ' + money(o.ext) +
+      ' · fair ' + fu + ' = ' + money(o.extF) + tag + (o.qty === 0 && o.extF > 0 ? ' (fair is a lump allowance; quoted qty is 0 ' + m + ')' : '');
+    return '<tr' + (none ? ' class="off"' : '') + ' title="' + escAttr(tip) + '"><td>' + row.c + '</td><td>' + row.n + tag + '</td><td class="num">' +
+      fmtQty(o.qty, m) + '</td><td>' + m + '</td><td class="num">' + up + '</td><td class="num">' + money(o.ext) +
+      '</td><td class="num">' + fu + '</td><td class="num">' + money(o.extF) + '</td></tr>';
+  }).join('');
 }
 
 function bindPair(rangeId, numId, lo, hi, step) {

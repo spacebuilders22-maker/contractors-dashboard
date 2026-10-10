@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Infill, Compaction &amp; Slab — 14224 NW 1st Ave — Stan Ivanov</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg2: #1a2332;
+    --bg3: #243044;
+    --card: #1e2a3a;
+    --border: #2d3f56;
+    --text: #e8eef6;
+    --muted: #8b9cb3;
+    --accent: #3d9cf0;
+    --accent2: #2dd4bf;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --ok: #34d399;
+    --quote: #818cf8;
+    --fair: #2dd4bf;
+    --radius: 10px;
+    --shadow: 0 4px 24px rgba(0,0,0,.35);
+    --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+    --mono: "SF Mono", "Cascadia Code", Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 14.5px; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.45;
+    min-height: 100vh;
+  }
+  .app {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 0;
+    min-height: 100vh;
+  }
+  @media (max-width: 1100px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { position: relative !important; max-height: none; border-right: none; border-bottom: 1px solid var(--border); }
+  }
+
+  .topbar {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #152032 0%, #1a2d45 50%, #0f2840 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 1.1rem 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .topbar h1 {
+    font-size: 1.35rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+  }
+  .topbar .meta {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(61,156,240,.15);
+    color: var(--accent);
+    border: 1px solid rgba(61,156,240,.35);
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .badge.warn {
+    background: rgba(245,158,11,.12);
+    color: var(--warn);
+    border-color: rgba(245,158,11,.35);
+  }
+
+  .sidebar {
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 0.85rem 0.9rem 2rem;
+    position: sticky;
+    top: 0;
+    align-self: start;
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 0 0 0.55rem 0.15rem;
+  }
+  details.acc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+  }
+  details.acc > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 650;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg3);
+    user-select: none;
+  }
+  details.acc > summary::-webkit-details-marker { display: none; }
+  details.acc > summary::after {
+    content: "▸";
+    color: var(--muted);
+    font-size: 0.75rem;
+    transition: transform .15s;
+  }
+  details.acc[open] > summary::after { transform: rotate(90deg); }
+  details.acc .acc-body {
+    padding: 0.7rem 0.75rem 0.85rem;
+  }
+  .param { margin-bottom: 0.75rem; }
+  .param label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.78rem;
+    margin-bottom: 0.25rem;
+    color: var(--text);
+  }
+  .param label .hint {
+    color: var(--muted);
+    font-size: 0.68rem;
+    font-weight: 400;
+  }
+  .param .row {
+    display: grid;
+    grid-template-columns: 1fr 68px;
+    gap: 0.4rem;
+    align-items: center;
+  }
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+    height: 1.15rem;
+  }
+  input[type="number"], select {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 0.32rem 0.4rem;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+  }
+  select { cursor: pointer; }
+  input[type="number"]:focus, select:focus {
+    outline: 2px solid rgba(61,156,240,.45);
+    border-color: var(--accent);
+  }
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.45rem 0.55rem;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 0.45rem;
+    font-size: 0.78rem;
+  }
+  .toggle-row input[type="checkbox"] {
+    width: 1.05rem;
+    height: 1.05rem;
+    accent-color: var(--accent2);
+    flex-shrink: 0;
+  }
+  .toggle-row .hint {
+    color: var(--muted);
+    font-size: 0.68rem;
+  }
+  .scale-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0.35rem 0 0.55rem;
+  }
+  .pill {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.25rem 0.45rem;
+    font-size: 0.68rem;
+    font-family: var(--mono);
+    color: var(--accent2);
+  }
+  .pill span { color: var(--muted); }
+  .btn-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+  }
+  button.btn {
+    appearance: none;
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+  }
+  button.btn:hover { background: #2a3d55; border-color: var(--accent); }
+  button.btn.primary {
+    background: linear-gradient(135deg, #2563eb, #0ea5e9);
+    border-color: transparent;
+    color: #fff;
+  }
+  button.btn.primary:hover { filter: brightness(1.08); }
+
+  .main {
+    padding: 1.1rem 1.25rem 2.5rem;
+    background: var(--bg);
+  }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.65rem;
+    margin-bottom: 1rem;
+  }
+  .kpi {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.75rem 0.85rem;
+    box-shadow: var(--shadow);
+  }
+  .kpi .label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
+  }
+  .kpi .value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .kpi .sub {
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+  .kpi.save .value { color: var(--ok); }
+  .kpi.bill .value { color: var(--accent); }
+  .kpi.fair .value { color: var(--fair); }
+  .kpi.quote .value { color: var(--quote); }
+
+  .charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
+  @media (max-width: 800px) {
+    .charts { grid-template-columns: 1fr; }
+  }
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.95rem;
+    box-shadow: var(--shadow);
+  }
+  .chart-card.wide { grid-column: 1 / -1; }
+  .chart-card h3 {
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 0.55rem;
+  }
+  .chart-wrap { position: relative; height: 260px; }
+  .chart-wrap.tall { height: 300px; }
+
+  .savings-card, .notes-card, .model-notes {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.1rem;
+    margin-bottom: 0.8rem;
+    box-shadow: var(--shadow);
+  }
+  .savings-card h3, .notes-card h3 {
+    font-size: 0.88rem;
+    margin-bottom: 0.55rem;
+  }
+  .savings-list { list-style: none; }
+  .savings-list li {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    gap: 0.45rem;
+    align-items: start;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid rgba(45,63,86,.6);
+    font-size: 0.78rem;
+  }
+  .savings-list li:last-child { border-bottom: none; }
+  .savings-list .rank {
+    color: var(--warn);
+    font-weight: 700;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+  }
+  .savings-list .amt {
+    font-family: var(--mono);
+    color: var(--ok);
+    white-space: nowrap;
+    font-size: 0.75rem;
+  }
+  .fixed-scaled {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+    font-size: 0.78rem;
+  }
+  @media (max-width: 600px) {
+    .fixed-scaled { grid-template-columns: 1fr; }
+  }
+  .fixed-scaled h4 {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
+  }
+  .fixed-scaled ul { padding-left: 1.05rem; color: var(--muted); }
+  .fixed-scaled li { margin-bottom: 0.15rem; }
+
+  details.model-notes { cursor: pointer; }
+  details.model-notes summary {
+    font-weight: 600;
+    font-size: 0.88rem;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  details.model-notes summary::after {
+    content: "▸";
+    color: var(--muted);
+    transition: transform .15s;
+  }
+  details.model-notes[open] summary::after { transform: rotate(90deg); }
+  details.model-notes .body {
+    margin-top: 0.7rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  details.model-notes .body p { margin-bottom: 0.45rem; }
+  details.model-notes .body code {
+    font-family: var(--mono);
+    background: var(--bg3);
+    padding: 0.08rem 0.28rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    color: var(--accent2);
+  }
+  details.model-notes table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.45rem 0;
+    font-size: 0.72rem;
+  }
+  details.model-notes th, details.model-notes td {
+    border: 1px solid var(--border);
+    padding: 0.28rem 0.4rem;
+    text-align: left;
+  }
+  details.model-notes th { background: var(--bg3); color: var(--text); }
+
+  footer.disclaimer {
+    margin-top: 1.1rem;
+    padding: 0.8rem 1rem;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    font-size: 0.7rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  #customFeeWrap { display: none; }
+  .lineout { font-family: var(--mono); font-size: 0.64rem; color: var(--muted); margin-top: 0.2rem; line-height: 1.35; }
+  .lineout div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lineout.solo { margin: -0.25rem 0 0.5rem 0.2rem; }
+  .eq-item select { margin-bottom: 0.2rem; }
+  .eq-item .eq-row { display: grid; grid-template-columns: 1fr 90px; gap: 0.4rem; align-items: center; font-size: 0.72rem; color: var(--muted); margin: 0.15rem 0; }
+  .eq-item .eq-src { font-size: 0.62rem; color: var(--muted); margin-top: 0.1rem; line-height: 1.3; }
+  .eq-item.inactive { opacity: 0.5; }
+  button.btn.small { padding: 0.3rem 0.55rem; font-size: 0.7rem; font-weight: 500; width: 100%; margin-top: 0.3rem; }
+  .presetnote { font-size: 0.62rem; color: var(--muted); margin-top: 0.25rem; line-height: 1.35; cursor: help; }
+  .subhead { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0.2rem 0 0.45rem; border-top: 1px solid var(--border); padding-top: 0.55rem; }
+  details.model-notes table.lines tr.cat td { background: var(--bg3); color: var(--text); font-weight: 600; }
+  details.model-notes table.lines td.num, details.model-notes table.lines th.num { text-align: right; font-family: var(--mono); white-space: nowrap; }
+  details.model-notes table.lines tr.off td { opacity: 0.45; }
+
+  /* Keep v1 layout feel: left dials always visible as sections, main charts + savings below */
+  .sidebar {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding-bottom: 2rem;
+  }
+  .acc {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 0.65rem;
+    background: rgba(255,255,255,0.02);
+  }
+  .acc > summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 0.55rem 0.7rem;
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    border-bottom: 1px solid transparent;
+  }
+  .acc[open] > summary {
+    border-bottom-color: var(--border);
+  }
+  .acc > summary::-webkit-details-marker { display: none; }
+  .acc > summary::after {
+    content: "▾";
+    float: right;
+    opacity: 0.55;
+    font-size: 0.7rem;
+  }
+  .acc:not([open]) > summary::after { content: "▸"; }
+  .acc-body {
+    padding: 0.55rem 0.7rem 0.75rem;
+  }
+  .main {
+    min-width: 0;
+  }
+  .charts {
+    margin-bottom: 1rem;
+  }
+  .savings-card {
+    margin-top: 0.25rem;
+  }
+</style>
+<style>
+  .navlink { color: var(--accent2); text-decoration: none; font-size: .78rem; font-weight: 600; border: 1px solid var(--border); border-radius: 999px; padding: .2rem .6rem; }
+  .navlink:hover { border-color: var(--accent2); }
+  .area-row { display: grid; grid-template-columns: 20px 1fr 78px; gap: .45rem; align-items: center; padding: .45rem .55rem; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; margin-bottom: .45rem; font-size: .76rem; }
+  .area-row input[type="checkbox"] { width: 1.05rem; height: 1.05rem; accent-color: var(--accent2); }
+  .area-row .hint { color: var(--muted); font-size: .64rem; display: block; }
+  .area-row input[type="text"] { width: 100%; background: var(--bg2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: .25rem .35rem; font-size: .74rem; }
+  .area-row.off { opacity: .5; }
+  .seg { display: flex; gap: .3rem; margin: .1rem 0 .4rem; }
+  .seg button { flex: 1; appearance: none; background: var(--bg3); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: .28rem; font-size: .72rem; font-family: var(--mono); cursor: pointer; }
+  .seg button.on { border-color: var(--accent); background: rgba(61,156,240,.18); color: var(--accent); }
+  .auto-row { display: flex; align-items: center; gap: .35rem; font-size: .66rem; color: var(--muted); margin-top: .2rem; }
+  .auto-row input { accent-color: var(--accent2); }
+  input[readonly] { opacity: .65; }
+  .cmp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: .6rem; margin: .3rem 0 .7rem; }
+  .cmp-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: .6rem .7rem; }
+  .cmp-box .l { font-size: .64rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .cmp-box .v { font-size: 1.1rem; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: .15rem; }
+  .cmp-box .s { font-size: .66rem; color: var(--muted); margin-top: .15rem; }
+  .cmp-box.ok .v { color: var(--ok); } .cmp-box.q .v { color: var(--quote); } .cmp-box.b .v { color: var(--accent); }
+  .checks { list-style: none; font-size: .76rem; }
+  .checks li { padding: .3rem 0; border-bottom: 1px solid rgba(45,63,86,.6); display: flex; justify-content: space-between; gap: .5rem; }
+  .checks li:last-child { border-bottom: none; }
+  .checks .st { font-family: var(--mono); font-size: .72rem; white-space: nowrap; }
+  .checks .st.pass { color: var(--ok); } .checks .st.fail { color: var(--warn); }
+  .excl { columns: 2; column-gap: 1.4rem; padding-left: 1.05rem; color: var(--muted); font-size: .78rem; }
+  @media (max-width: 600px) { .excl { columns: 1; } }
+  .excl li { margin-bottom: .2rem; break-inside: avoid; }
+  table.lines2 { width: 100%; border-collapse: collapse; font-size: .74rem; }
+  table.lines2 th, table.lines2 td { border: 1px solid var(--border); padding: .3rem .45rem; text-align: left; }
+  table.lines2 th { background: var(--bg3); color: var(--text); font-weight: 600; }
+  table.lines2 td.num, table.lines2 th.num { text-align: right; font-family: var(--mono); white-space: nowrap; }
+  table.lines2 tr.cat td { background: var(--bg3); font-weight: 600; }
+  table.lines2 tr.tot td { font-weight: 700; color: var(--accent); }
+  table.lines2 tr.off td { opacity: .45; }
+  .notes-card p { font-size: .78rem; color: var(--muted); margin-bottom: .4rem; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div>
+      <h1>Infill, Compaction &amp; Slab-on-Grade — Full Cost Dashboard</h1>
+      <div class="meta">
+        Stan Ivanov · 14224 NW 1st Ave, Miami · interior infill to raise floor + 4&Prime; slab · vs Florida Entry Builders fixed bid (Oct 1, 2026)
+      </div>
+    </div>
+    <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center">
+      <a class="navlink" href="../">&larr; Pool dashboard</a>
+      <span class="badge">Interactive — not a bid</span>
+      <span class="badge warn">Open-book cost-plus planning</span>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <div class="sidebar-title">Parameters</div>
+
+    <details class="acc" open>
+      <summary>A · Infill areas (SF)</summary>
+      <div class="acc-body">
+        <div id="areaRows"></div>
+        <div class="scale-pills">
+          <div class="pill"><span>total area </span><strong id="pArea">—</strong> SF</div>
+          <div class="pill"><span>areas on </span><strong id="pAreasOn">—</strong></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="acc" open>
+      <summary>B · Fill &amp; compaction</summary>
+      <div class="acc-body">
+        <div class="param">
+          <label>Fill depth (ft) <span class="hint">1–4 ft · compacted in 1-ft lifts</span></label>
+          <div class="seg" id="depthSeg"><button type="button" data-v="2">2 ft</button><button type="button" data-v="3">3 ft</button></div>
+          <div class="row">
+            <input type="range" id="depth" min="1" max="4" step="0.25" value="3" />
+            <input type="number" id="depthN" min="1" max="4" step="0.25" value="3" />
+          </div>
+        </div>
+        <div id="dialsB"></div>
+        <div class="scale-pills">
+          <div class="pill"><span>compacted </span><strong id="pComp">—</strong> CY</div>
+          <div class="pill"><span>loose </span><strong id="pLoose">—</strong> CY</div>
+        </div>
+      </div>
+    </details>
+
+    <details class="acc" open>
+      <summary>C · Slab-on-grade</summary>
+      <div class="acc-body">
+        <div id="dialsC"></div>
+        <div class="scale-pills">
+          <div class="pill"><span>concrete </span><strong id="pConc">—</strong> CY</div>
+          <div class="pill"><span>VB / mesh </span><strong id="pVB">—</strong> SF</div>
+        </div>
+      </div>
+    </details>
+
+    <details class="acc" open>
+      <summary>D · Labor &amp; equipment</summary>
+      <div class="acc-body">
+        <div class="subhead" style="border-top:none;padding-top:0">Fill placement &amp; compaction crew</div>
+        <div id="dialsD1"></div>
+        <div class="param">
+          <label>Fill crew days (day) <span class="hint" id="fillDaysHint">auto = compacted CY ÷ CY/day, rounded up</span></label>
+          <div class="row">
+            <input type="range" id="fillDays" min="0.5" max="15" step="0.5" value="3" />
+            <input type="number" id="fillDaysN" min="0.5" max="15" step="0.5" value="3" />
+          </div>
+          <label class="auto-row"><input type="checkbox" id="fillDaysAuto" checked /> auto-estimate from production rate</label>
+        </div>
+        <div id="dialsD2"></div>
+        <div class="subhead">Slab crew</div>
+        <div id="dialsD3"></div>
+        <div class="scale-pills">
+          <div class="pill"><span>fill crew </span><strong id="pFillLab">—</strong></div>
+          <div class="pill"><span>slab crew </span><strong id="pSlabLab">—</strong></div>
+          <div class="pill"><span>rental </span><strong id="pRent">—</strong></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="acc" open>
+      <summary>E · Density testing (owner-paid)</summary>
+      <div class="acc-body">
+        <div id="dialsE1"></div>
+        <div class="param">
+          <label>Number of tests (each) <span class="hint">auto = 1 per 1-ft lift per 1,000 SF</span></label>
+          <div class="row">
+            <input type="range" id="tests" min="0" max="40" step="1" value="9" />
+            <input type="number" id="testsN" min="0" max="40" step="1" value="9" />
+          </div>
+          <label class="auto-row"><input type="checkbox" id="testsAuto" checked /> auto: lifts × ⌈SF ÷ 1,000⌉</label>
+        </div>
+        <div class="toggle-row">
+          <span>Include testing in cost-plus total<br/><span class="hint">Florida Entry excludes it; owner pays either way · no fee on it</span></span>
+          <input type="checkbox" id="testsIncl" checked />
+        </div>
+      </div>
+    </details>
+
+    <details class="acc" open>
+      <summary>F · Commercial</summary>
+      <div class="acc-body">
+        <div id="dialsF"></div>
+      </div>
+    </details>
+
+    <div class="btn-row">
+      <button type="button" class="btn" id="btnReset">Reset to defaults</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="kpi-grid">
+      <div class="kpi bill"><div class="label">Cost-plus total</div><div class="value" id="kTotal">—</div><div class="sub" id="kTotalSub">direct + fee + testing</div></div>
+      <div class="kpi quote"><div class="label">Florida Entry bid</div><div class="value" id="kBid">—</div><div class="sub">fixed, proposal Oct 1, 2026</div></div>
+      <div class="kpi save"><div class="label">Savings vs bid</div><div class="value" id="kSave">—</div><div class="sub" id="kSavePct">—</div></div>
+      <div class="kpi fair"><div class="label">Cost-plus $/SF</div><div class="value" id="kPSF">—</div><div class="sub" id="kPSFsub">—</div></div>
+      <div class="kpi"><div class="label">Materials</div><div class="value" id="kMat" style="font-size:1.05rem">—</div><div class="sub">fill, concrete, VB/mesh, dowels</div></div>
+      <div class="kpi"><div class="label">Labor</div><div class="value" id="kLab" style="font-size:1.05rem">—</div><div class="sub">fill crew + slab crew</div></div>
+      <div class="kpi"><div class="label">Equipment</div><div class="value" id="kEq" style="font-size:1.05rem">—</div><div class="sub">compactor/loader + pump</div></div>
+      <div class="kpi"><div class="label">Fee (OH&amp;P)</div><div class="value" id="kFee" style="font-size:1.05rem">—</div><div class="sub" id="kFeeSub">—</div></div>
+      <div class="kpi"><div class="label">Compacted fill</div><div class="value" id="kComp" style="font-size:1.05rem">—</div><div class="sub" id="kCompSub">in place</div></div>
+      <div class="kpi"><div class="label">Loose fill</div><div class="value" id="kLoose" style="font-size:1.05rem">—</div><div class="sub" id="kLooseSub">delivered</div></div>
+      <div class="kpi"><div class="label">Concrete</div><div class="value" id="kConc" style="font-size:1.05rem">—</div><div class="sub" id="kConcSub">incl. waste</div></div>
+      <div class="kpi"><div class="label">Vapor barrier</div><div class="value" id="kVB" style="font-size:1.05rem">—</div><div class="sub" id="kVBSub">incl. overlap</div></div>
+    </div>
+
+    <div class="charts">
+      <div class="chart-card">
+        <h3>Cost by line category</h3>
+        <div class="chart-wrap"><canvas id="pieCat"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Materials · Labor · Equipment · Fee · Testing</h3>
+        <div class="chart-wrap"><canvas id="pieType"></canvas></div>
+      </div>
+      <div class="chart-card wide">
+        <h3>Cost-plus (this model) vs Florida Entry fixed bid</h3>
+        <div class="chart-wrap tall"><canvas id="barCmp"></canvas></div>
+      </div>
+    </div>
+
+    <div class="savings-card">
+      <h3>Savings comparison — Florida Entry Builders fixed bid</h3>
+      <div class="cmp-grid">
+        <div class="cmp-box q"><div class="l">Florida Entry fixed bid</div><div class="v" id="cBid">—</div><div class="s" id="cBidPSF">—</div></div>
+        <div class="cmp-box b"><div class="l">Cost-plus total (this model)</div><div class="v" id="cOurs">—</div><div class="s" id="cOursPSF">—</div></div>
+        <div class="cmp-box ok"><div class="l">Savings</div><div class="v" id="cSave">—</div><div class="s" id="cSavePct">—</div></div>
+        <div class="cmp-box"><div class="l">Owner all-in, like-for-like</div><div class="v" id="cAllIn" style="font-size:.95rem">—</div><div class="s">both sides + owner-paid density testing</div></div>
+      </div>
+      <h3 style="font-size:.8rem;margin-top:.3rem">What moves the number</h3>
+      <ul class="savings-list" id="sensList"></ul>
+    </div>
+
+    <details class="model-notes" open>
+      <summary>Line items — Qty · Unit · $/unit · Ext</summary>
+      <div class="body">
+        <table class="lines2">
+          <thead><tr><th>Item</th><th class="num">Qty</th><th>Unit</th><th class="num">Unit price</th><th class="num">Ext</th></tr></thead>
+          <tbody id="lineRows"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <div class="notes-card">
+      <h3>Florida Entry Builders proposal — exclusions &amp; terms</h3>
+      <p>Fixed bid <strong style="color:var(--text)">$53,578.79</strong>, proposal dated Oct 1, 2026. Items below are <strong style="color:var(--warn)">excluded</strong> from their price and would be extra (owner or other trades):</p>
+      <ul class="excl">
+        <li>Demolition</li>
+        <li>Debris hauling</li>
+        <li>Footers and tie beams</li>
+        <li>Unsuitable soil removal</li>
+        <li>Utilities and drainage</li>
+        <li>A/E (architecture / engineering)</li>
+        <li>Survey and permits</li>
+        <li>All testing (incl. density / compaction tests)</li>
+        <li>Curing treatments</li>
+        <li>Saw-cut joints</li>
+      </ul>
+      <p style="margin-top:.5rem"><strong style="color:var(--text)">Warranty:</strong> 1-year workmanship warranty.</p>
+      <p><strong style="color:var(--text)">No quantities:</strong> the proposal gives a lump sum only — no CY of fill, CY of concrete, SF of slab, or lift/compaction spec — so scope can't be checked line by line. Ask for quantities before comparing like-for-like.</p>
+    </div>
+
+    <div class="notes-card">
+      <h3>Sanity checks (defaults: 3 ft depth, 2,440 SF)</h3>
+      <ul class="checks" id="checks"></ul>
+    </div>
+
+    <details class="model-notes">
+      <summary>Model notes &amp; assumptions</summary>
+      <div class="body">
+        <p><strong>Areas:</strong> Bedroom wing 1,250 SF; Garage (converted block — Bedrooms 04–05, Bath 03, laundry) 590 SF; Kitchen + dining + front half of living room 600 SF = 2,440 SF. Custom row is off / 0 SF by default.</p>
+        <p><strong>Fill:</strong> compacted CY = <code>SF × depth ft ÷ 27</code>. Loose (delivered) CY = <code>compacted × (1 + shrink %)</code>. Fill priced on loose CY at <code>$30/CY</code> delivered (Sunshine Coast Materials limerock fill, published price).</p>
+        <p><strong>Concrete:</strong> <code>SF × thickness in ÷ 12 ÷ 27</code> + thickened edge <code>LF × width × (edge depth − slab thickness) ÷ 27</code>, then × (1 + waste %). Priced at <code>$160/CY</code> delivered (Miami range $136–220/CY). Pump is a lump sum.</p>
+        <p><strong>Vapor barrier + WWF mesh + chairs:</strong> <code>SF × (1 + overlap %) × $/SF</code>. Dowels + epoxy into existing slab/footings: lump sum.</p>
+        <p><strong>Labor:</strong> crew-day = people × $/hr × hr/day. Fill crew days auto = <code>⌈compacted CY ÷ CY/day⌉</code> (≈100 CY/day placed and compacted in lifts inside the house); untick auto to override. Compactor + small loader rental is charged per fill crew day. Slab crew = prep days (forming, steel, VB) + pour days.</p>
+        <p><strong>Density testing:</strong> auto = <code>⌈depth ft⌉ lifts × ⌈SF ÷ 1,000⌉</code> tests at ~$150 each. Owner-paid (Florida Entry excludes all testing), so no fee is applied to it.</p>
+        <p><strong>Fee:</strong> contractor overhead &amp; profit % on direct cost (materials + labor + equipment). Cost-plus total = direct + fee (+ testing when included).</p>
+        <p>Not included on either side: demo, haul-off, footers/tie beams, unsuitable soil, utilities, A/E, survey, permits, curing, saw-cutting. Chart.js loads from CDN (needs network once).</p>
+      </div>
+    </details>
+
+    <footer class="disclaimer">
+      Estimates for planning only. Cost-plus model built from published/local unit prices for 14224 NW 1st Ave, compared against Florida Entry Builders' fixed proposal of Oct 1, 2026.
+      Not a contractor bid, not engineering, and not a substitute for a geotechnical/compaction spec, Miami-Dade permits, or inspections.
+    </footer>
+  </main>
+</div>
+<script>
+const FE_BID = 53578.79;
+const AREAS = [
+  { id: 'a1', name: 'Bedroom wing', hint: '', sf: 1250, on: true },
+  { id: 'a2', name: 'Garage (converted block)', hint: 'Bedrooms 04–05, Bath 03, laundry', sf: 590, on: true },
+  { id: 'a3', name: 'Kitchen + dining + front ½ living', hint: '', sf: 600, on: true },
+  { id: 'a4', name: 'Custom area', hint: 'rename / enter SF', sf: 0, on: false, custom: true }
+];
+// id, label, unit (shown on line), hint, min, max, step, default
+const DIALS = {
+  dialsB: [
+    ['shrink', 'Compaction / shrink factor', '%', 'loose CY = compacted × (1 + %)', 0, 50, 1, 25],
+    ['fillPrice', 'Fill price', '$/CY', 'Sunshine Coast limerock, delivered', 10, 60, 0.5, 30]
+  ],
+  dialsC: [
+    ['thick', 'Slab thickness', 'in', '3.5–8 in', 3.5, 8, 0.5, 4],
+    ['waste', 'Concrete waste', '%', 'on net CY', 0, 25, 1, 10],
+    ['concPrice', 'Concrete price', '$/CY', 'delivered · range $136–220/CY', 120, 260, 1, 160],
+    ['pump', 'Concrete pump', 'lump sum', '$ · 1 ls', 0, 3000, 50, 1300],
+    ['vbPrice', 'Vapor barrier + WWF mesh + chairs', '$/SF', 'material', 0.2, 1.5, 0.05, 0.5],
+    ['vbOverlap', 'VB / mesh overlap', '%', 'laps + turn-ups', 0, 25, 1, 10],
+    ['dowels', 'Dowels + epoxy', 'lump sum', '$ · 1 ls', 0, 3000, 25, 600],
+    ['teLF', 'Thickened edge (optional)', 'LF', '0 = none', 0, 600, 5, 0],
+    ['teW', 'Thickened edge width', 'in', 'bottom width', 6, 24, 1, 12],
+    ['teD', 'Thickened edge total depth', 'in', 'incl. slab thickness', 6, 24, 1, 12]
+  ],
+  dialsD1: [
+    ['fillCrew', 'Fill crew size', 'people', 'placement + compaction', 1, 8, 1, 3],
+    ['fillRate', 'Fill crew wage', '$/hr', 'per person', 15, 75, 1, 30],
+    ['fillHrs', 'Fill crew hours', 'hr/day', '', 4, 12, 0.5, 8],
+    ['prod', 'Production rate', 'CY/day', 'compacted CY placed in lifts', 40, 250, 5, 100]
+  ],
+  dialsD2: [
+    ['rent', 'Plate compactor + small loader rental', '$/day', 'per fill crew day', 0, 900, 10, 350]
+  ],
+  dialsD3: [
+    ['slabCrew', 'Slab crew size', 'people', '', 1, 10, 1, 5],
+    ['slabRate', 'Slab crew wage', '$/hr', 'per person', 15, 75, 1, 30],
+    ['slabHrs', 'Slab crew hours', 'hr/day', '', 4, 12, 0.5, 8],
+    ['slabPrep', 'Forming, steel & VB', 'day', '', 0, 8, 0.5, 2],
+    ['slabPour', 'Pour', 'day', '', 0, 3, 0.5, 1]
+  ],
+  dialsE1: [
+    ['testPrice', 'Density test price', '$/each', 'owner-paid', 50, 400, 5, 150]
+  ],
+  dialsF: [
+    ['fee', 'Contractor overhead & profit fee', '%', 'on direct cost', 0, 35, 0.5, 15],
+    ['feBid', 'Florida Entry fixed bid', 'lump sum', '$ · proposal Oct 1, 2026', 30000, 90000, 0.01, FE_BID]
+  ]
+};
+const DEFAULTS = { depth: 3, fillDays: 3, tests: 9, fillDaysAuto: true, testsAuto: true, testsIncl: true };
+for (const g of Object.values(DIALS)) for (const d of g) DEFAULTS[d[0]] = d[7];
+
+const CAT_ORDER = ['Fill material', 'Concrete', 'VB / mesh / dowels', 'Fill crew labor', 'Slab crew labor', 'Equipment', 'Fee (OH&P)', 'Density testing'];
+const CAT_COLORS = ['#f59e0b', '#818cf8', '#a78bfa', '#3d9cf0', '#2dd4bf', '#fb7185', '#64748b', '#34d399'];
+const TYPE_ORDER = ['Materials', 'Labor', 'Equipment', 'Fee', 'Testing'];
+const TYPE_COLORS = ['#f59e0b', '#3d9cf0', '#fb7185', '#64748b', '#34d399'];
+
+function $(id) { return document.getElementById(id); }
+function money(n) { const neg = n < 0; return (neg ? '-$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-US'); }
+function money2(n) { const a = Math.abs(n); const d = (Math.abs(a - Math.round(a)) < 0.005) ? 0 : 2; return (n < 0 ? '-$' : '$') + a.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+function num(n, d = 0) { return n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+
+function renderDials() {
+  for (const [box, list] of Object.entries(DIALS)) {
+    $(box).innerHTML = list.map(([id, label, unit, hint, lo, hi, step, def]) =>
+      `<div class="param"><label>${esc(label)} (${esc(unit)}) <span class="hint">${esc(hint)}</span></label>
+       <div class="row"><input type="range" id="${id}" min="${lo}" max="${hi}" step="${step}" value="${def}" />
+       <input type="number" id="${id}N" min="${lo}" max="${hi}" step="${step}" value="${def}" /></div></div>`).join('');
+  }
+  $('areaRows').innerHTML = AREAS.map(a =>
+    `<div class="area-row" id="${a.id}Row"><input type="checkbox" id="${a.id}On" ${a.on ? 'checked' : ''} />
+     <span>${a.custom ? `<input type="text" id="${a.id}Name" value="${esc(a.name)}" />` : esc(a.name)}
+     <span class="hint">${a.custom ? 'SF · ' : ''}${esc(a.hint)}${a.hint && !a.custom ? ' · ' : ''}${a.custom ? '' : 'default ' + num(a.sf) + ' SF'}</span></span>
+     <input type="number" id="${a.id}SF" min="0" max="10000" step="10" value="${a.sf}" title="SF" /></div>`).join('');
+}
+
+function bindPair(id, lo, hi, step) {
+  const r = $(id), n = $(id + 'N');
+  const sync = (from) => {
+    let v = +from.value;
+    if (Number.isNaN(v)) v = +r.value;
+    v = clamp(v, lo, hi);
+    const prec = step < 1 ? (String(step).split('.')[1] || '').length : 0;
+    v = Math.round(v / step) * step;
+    if (prec) v = +v.toFixed(prec);
+    r.value = v; n.value = v;
+    updateUI();
+  };
+  r.addEventListener('input', () => sync(r));
+  n.addEventListener('change', () => sync(n));
+  n.addEventListener('input', () => { if (n.value !== '') sync(n); });
+}
+
+function getParams() {
+  const p = {};
+  for (const g of Object.values(DIALS)) for (const d of g) p[d[0]] = +$(d[0]).value;
+  p.depth = +$('depth').value;
+  p.areas = AREAS.map(a => ({ name: a.custom ? ($(a.id + 'Name').value || 'Custom area') : a.name, sf: Math.max(0, +$(a.id + 'SF').value || 0), on: $(a.id + 'On').checked }));
+  p.fillDaysAuto = $('fillDaysAuto').checked; p.fillDays = +$('fillDays').value;
+  p.testsAuto = $('testsAuto').checked; p.tests = +$('tests').value;
+  p.testsIncl = $('testsIncl').checked;
+  return p;
+}
+
+function compute(p) {
+  const A = p.areas.reduce((s, a) => s + (a.on ? a.sf : 0), 0);
+  const compCY = A * p.depth / 27;
+  const looseCY = compCY * (1 + p.shrink / 100);
+  const slabNetCY = A * (p.thick / 12) / 27;
+  const teCY = p.teLF * (p.teW / 12) * Math.max(0, (p.teD - p.thick) / 12) / 27;
+  const concCY = (slabNetCY + teCY) * (1 + p.waste / 100);
+  const vbSF = A * (1 + p.vbOverlap / 100);
+  const autoDays = compCY > 0 ? Math.max(0.5, Math.ceil(compCY / p.prod)) : 0;
+  const fillDays = p.fillDaysAuto ? autoDays : p.fillDays;
+  const lifts = Math.ceil(p.depth - 1e-9);
+  const autoTests = A > 0 ? lifts * Math.ceil(A / 1000) : 0;
+  const tests = p.testsAuto ? autoTests : p.tests;
+
+  const fillCrewDay = p.fillCrew * p.fillRate * p.fillHrs;
+  const slabCrewDay = p.slabCrew * p.slabRate * p.slabHrs;
+  const slabDays = p.slabPrep + p.slabPour;
+
+  const L = {
+    fill: looseCY * p.fillPrice,
+    conc: concCY * p.concPrice,
+    vb: vbSF * p.vbPrice,
+    dowels: p.dowels,
+    fillLab: fillCrewDay * fillDays,
+    slabLab: slabCrewDay * slabDays,
+    rent: p.rent * fillDays,
+    pump: p.pump,
+    test: tests * p.testPrice
+  };
+  const materials = L.fill + L.conc + L.vb + L.dowels;
+  const labor = L.fillLab + L.slabLab;
+  const equip = L.rent + L.pump;
+  const direct = materials + labor + equip;
+  const fee = direct * p.fee / 100;
+  const costPlus = direct + fee;
+  const testing = p.testsIncl ? L.test : 0;
+  const total = costPlus + testing;
+  const bid = p.feBid;
+  const save = bid - total;
+  return {
+    A, compCY, looseCY, slabNetCY, teCY, concCY, vbSF, autoDays, fillDays, lifts, autoTests, tests,
+    fillCrewDay, slabCrewDay, slabDays, L, materials, labor, equip, direct, fee, costPlus, testing, total, bid, save,
+    savePct: bid > 0 ? save / bid : 0,
+    psf: A > 0 ? total / A : 0, bidPsf: A > 0 ? bid / A : 0,
+    allInOurs: costPlus + L.test, allInBid: bid + L.test,
+    cats: [L.fill, L.conc, L.vb + L.dowels, L.fillLab, L.slabLab, equip, fee, testing],
+    types: [materials, labor, equip, fee, testing]
+  };
+}
+
+let pieCat, pieType, barCmp;
+const chartDefaults = {
+  responsive: true, maintainAspectRatio: false, cutout: '52%',
+  plugins: {
+    legend: { position: 'bottom', labels: { color: '#8b9cb3', boxWidth: 12, font: { size: 11 } } },
+    tooltip: { callbacks: { label: (ctx) => ' ' + ctx.label + ': ' + money(ctx.raw || 0) } }
+  }
+};
+function initCharts() {
+  if (typeof Chart === 'undefined') return;
+  const r0 = compute(getParams());
+  pieCat = new Chart($('pieCat'), { type: 'doughnut', data: { labels: CAT_ORDER, datasets: [{ data: r0.cats.map(Math.round), backgroundColor: CAT_COLORS, borderWidth: 0 }] }, options: chartDefaults });
+  pieType = new Chart($('pieType'), { type: 'doughnut', data: { labels: TYPE_ORDER, datasets: [{ data: r0.types.map(Math.round), backgroundColor: TYPE_COLORS, borderWidth: 0 }] }, options: chartDefaults });
+  barCmp = new Chart($('barCmp'), {
+    type: 'bar',
+    data: {
+      labels: ['Cost-plus (this model)', 'Florida Entry fixed bid'],
+      datasets: TYPE_ORDER.map((t, i) => ({ label: t, data: [Math.round(r0.types[i]), 0], backgroundColor: TYPE_COLORS[i], stack: 's' }))
+        .concat([{ label: 'Florida Entry lump sum', data: [0, Math.round(r0.bid)], backgroundColor: '#818cf8', stack: 's' }])
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      scales: {
+        x: { stacked: true, ticks: { color: '#8b9cb3', callback: (v) => '$' + (v / 1000) + 'k' }, grid: { color: 'rgba(45,63,86,.4)' } },
+        y: { stacked: true, ticks: { color: '#8b9cb3' }, grid: { color: 'rgba(45,63,86,.4)' } }
+      },
+      plugins: {
+        legend: { labels: { color: '#8b9cb3', boxWidth: 12 } },
+        tooltip: { callbacks: { label: (ctx) => ' ' + ctx.dataset.label + ': ' + money(ctx.raw) } }
+      }
+    }
+  });
+}
+
+function lineRows(p, r) {
+  const L = r.L;
+  const row = (item, q, unit, up, ext, off) =>
+    `<tr${off ? ' class="off"' : ''}><td>${esc(item)}</td><td class="num">${q}</td><td>${unit}</td><td class="num">${up}</td><td class="num">${money(ext)}</td></tr>`;
+  const cat = (name, sum) => `<tr class="cat"><td colspan="4">${name}</td><td class="num">${money(sum)}</td></tr>`;
+  let h = '';
+  h += cat('Infill areas', 0).replace('$0', num(r.A) + ' SF');
+  for (const a of p.areas) h += `<tr${a.on ? '' : ' class="off"'}><td>${esc(a.name)}${a.on ? '' : ' (off)'}</td><td class="num">${num(a.sf)}</td><td>SF</td><td class="num">—</td><td class="num">—</td></tr>`;
+  h += cat('Materials', r.materials);
+  h += row('Limerock fill, delivered (loose CY; ' + num(r.compCY, 1) + ' CY compacted × ' + (1 + p.shrink / 100).toFixed(2) + ')', num(r.looseCY, 1), 'CY', money2(p.fillPrice) + '/CY', L.fill);
+  h += row('Ready-mix concrete, ' + p.thick + ' in slab' + (r.teCY > 0 ? ' + thickened edge' : '') + ' (+' + p.waste + '% waste)', num(r.concCY, 1), 'CY', money2(p.concPrice) + '/CY', L.conc);
+  h += row('Vapor barrier + WWF mesh + chairs (+' + p.vbOverlap + '% overlap)', num(r.vbSF), 'SF', '$' + p.vbPrice.toFixed(2) + '/SF', L.vb);
+  h += row('Dowels + epoxy', '1', 'lump sum', money2(p.dowels) + ' lump sum', L.dowels);
+  h += cat('Labor', r.labor);
+  h += row('Fill placement + compaction crew (' + p.fillCrew + ' people × $' + p.fillRate + '/hr × ' + p.fillHrs + ' hr/day = ' + money(r.fillCrewDay) + '/day)', num(r.fillDays, r.fillDays % 1 ? 1 : 0), 'day', money(r.fillCrewDay) + '/day', L.fillLab);
+  h += row('Slab crew — forming, steel, VB (' + p.slabCrew + ' people × $' + p.slabRate + '/hr × ' + p.slabHrs + ' hr/day)', num(p.slabPrep, p.slabPrep % 1 ? 1 : 0), 'day', money(r.slabCrewDay) + '/day', r.slabCrewDay * p.slabPrep);
+  h += row('Slab crew — pour', num(p.slabPour, p.slabPour % 1 ? 1 : 0), 'day', money(r.slabCrewDay) + '/day', r.slabCrewDay * p.slabPour);
+  h += cat('Equipment', r.equip);
+  h += row('Plate compactor + small loader rental', num(r.fillDays, r.fillDays % 1 ? 1 : 0), 'day', money2(p.rent) + '/day', L.rent);
+  h += row('Concrete pump', '1', 'lump sum', money2(p.pump) + ' lump sum', L.pump);
+  h += cat('Fee', r.fee);
+  h += row('Contractor overhead & profit on direct ' + money(r.direct), p.fee + '%', '% of direct', '—', r.fee);
+  h += cat('Density testing (owner-paid, no fee)', r.L.test);
+  h += row('Field density tests (' + r.lifts + ' lifts × ⌈' + num(r.A) + ' SF ÷ 1,000⌉' + (p.testsAuto ? '' : ', manual') + ')' + (p.testsIncl ? '' : ' — not in total'), num(r.tests), 'each', money2(p.testPrice) + '/each', L.test, !p.testsIncl);
+  h += `<tr class="tot"><td colspan="4">Cost-plus total${p.testsIncl ? ' (incl. testing)' : ''}</td><td class="num">${money(r.total)}</td></tr>`;
+  h += `<tr><td colspan="4">Florida Entry Builders fixed bid (no quantities given)</td><td class="num">${money2(r.bid)}</td></tr>`;
+  h += `<tr class="tot"><td colspan="4" style="color:var(--ok)">Savings</td><td class="num" style="color:var(--ok)">${money(r.save)}</td></tr>`;
+  $('lineRows').innerHTML = h;
+}
+
+function sensitivities(p, r) {
+  const alt = (ch) => compute(Object.assign({}, p, ch)).total;
+  const items = [
+    { item: 'Fill depth 2 ft instead of ' + p.depth + ' ft', note: 'fill, crew days, rental and tests all drop', d: r.total - alt({ depth: 2 }) },
+    { item: 'Concrete at $136/CY (low end)', note: 'vs ' + money2(p.concPrice) + '/CY on ' + num(r.concCY, 1) + ' CY', d: r.total - alt({ concPrice: 136 }) },
+    { item: 'Concrete at $220/CY (high end)', note: 'risk if the ready-mix quote comes in high', d: r.total - alt({ concPrice: 220 }) },
+    { item: 'Fee 10% instead of ' + p.fee + '%', note: 'OH&P on ' + money(r.direct) + ' direct', d: r.total - alt({ fee: 10 }) },
+    { item: 'Shrink factor 20% instead of ' + p.shrink + '%', note: 'fewer loose CY delivered', d: r.total - alt({ shrink: 20 }) },
+    { item: 'Fill production 75 CY/day (slower)', note: 'more crew + rental days', d: r.total - alt({ prod: 75, fillDaysAuto: true }) }
+  ].filter(s => Math.abs(s.d) >= 1);
+  $('sensList').innerHTML = items.map((s, i) =>
+    `<li><span class="rank">#${i + 1}</span><span><strong>${esc(s.item)}</strong><br/><span style="color:var(--muted);font-size:.72rem">${esc(s.note)}</span></span><span class="amt" style="color:${s.d >= 0 ? 'var(--ok)' : 'var(--danger)'}">${s.d >= 0 ? '−' : '+'}${money(Math.abs(s.d))}</span></li>`).join('')
+    || '<li style="grid-column:1/-1;color:var(--muted)">No sensitivities at these settings.</li>';
+}
+
+function defaultParams() {
+  return Object.assign({}, DEFAULTS, { areas: AREAS.map(a => ({ name: a.name, sf: a.sf, on: a.on })) });
+}
+function renderChecks() {
+  const d = compute(defaultParams());
+  const chk = (label, val, target, unit) => {
+    const ok = Math.abs(val - target) / target < 0.02;
+    return `<li><span>${label}</span><span class="st ${ok ? 'pass' : 'fail'}">${num(val, 1)} ${unit} · target ≈ ${target} ${unit} ${ok ? '✓' : '✗'}</span></li>`;
+  };
+  $('checks').innerHTML =
+    chk('Compacted fill (2,440 SF × 3 ft ÷ 27)', d.compCY, 271, 'CY') +
+    chk('Loose fill (× 1.25 shrink)', d.looseCY, 339, 'CY') +
+    chk('Concrete (2,440 SF × 4 in, +10% waste)', d.concCY, 33, 'CY') +
+    `<li><span>Defaults → cost-plus total</span><span class="st">${money(d.total)} · savings ${money(d.save)} (${(d.savePct * 100).toFixed(1)}%)</span></li>`;
+}
+
+function updateUI() {
+  const p = getParams();
+  const r = compute(p);
+  // auto fields
+  if (p.fillDaysAuto) { $('fillDays').value = r.autoDays; $('fillDaysN').value = r.autoDays; }
+  $('fillDays').disabled = p.fillDaysAuto; $('fillDaysN').readOnly = p.fillDaysAuto;
+  $('fillDaysHint').textContent = 'auto = ' + num(r.compCY, 1) + ' CY ÷ ' + p.prod + ' CY/day → ' + r.autoDays + ' day';
+  if (p.testsAuto) { $('tests').value = r.autoTests; $('testsN').value = r.autoTests; }
+  $('tests').disabled = p.testsAuto; $('testsN').readOnly = p.testsAuto;
+  for (const a of AREAS) $(a.id + 'Row').classList.toggle('off', !$(a.id + 'On').checked);
+  document.querySelectorAll('#depthSeg button').forEach(b => b.classList.toggle('on', +b.dataset.v === p.depth));
+
+  $('pArea').textContent = num(r.A);
+  $('pAreasOn').textContent = p.areas.filter(a => a.on && a.sf > 0).length + ' of ' + p.areas.length;
+  $('pComp').textContent = num(r.compCY, 1);
+  $('pLoose').textContent = num(r.looseCY, 1);
+  $('pConc').textContent = num(r.concCY, 1);
+  $('pVB').textContent = num(r.vbSF);
+  $('pFillLab').textContent = money(r.L.fillLab);
+  $('pSlabLab').textContent = money(r.L.slabLab);
+  $('pRent').textContent = money(r.L.rent);
+
+  $('kTotal').textContent = money(r.total);
+  $('kTotalSub').textContent = 'direct ' + money(r.direct) + ' + fee' + (p.testsIncl ? ' + testing' : '');
+  $('kBid').textContent = money2(r.bid);
+  $('kSave').textContent = money(r.save);
+  $('kSave').style.color = r.save >= 0 ? 'var(--ok)' : 'var(--danger)';
+  $('kSavePct').textContent = (r.savePct * 100).toFixed(1) + '% below the bid';
+  $('kPSF').textContent = r.A ? '$' + r.psf.toFixed(2) + '/SF' : '—';
+  $('kPSFsub').textContent = r.A ? 'Florida Entry $' + r.bidPsf.toFixed(2) + '/SF at ' + num(r.A) + ' SF' : 'no area selected';
+  $('kMat').textContent = money(r.materials);
+  $('kLab').textContent = money(r.labor);
+  $('kEq').textContent = money(r.equip);
+  $('kFee').textContent = money(r.fee);
+  $('kFeeSub').textContent = p.fee + '% of direct';
+  $('kComp').textContent = num(r.compCY, 1) + ' CY';
+  $('kCompSub').textContent = num(r.A) + ' SF × ' + p.depth + ' ft ÷ 27';
+  $('kLoose').textContent = num(r.looseCY, 1) + ' CY';
+  $('kLooseSub').textContent = 'delivered · +' + p.shrink + '% shrink';
+  $('kConc').textContent = num(r.concCY, 1) + ' CY';
+  $('kConcSub').textContent = p.thick + ' in slab · +' + p.waste + '% waste';
+  $('kVB').textContent = num(r.vbSF) + ' SF';
+  $('kVBSub').textContent = '+' + p.vbOverlap + '% overlap';
+
+  $('cBid').textContent = money2(r.bid);
+  $('cBidPSF').textContent = r.A ? '$' + r.bidPsf.toFixed(2) + '/SF at ' + num(r.A) + ' SF · excludes testing' : '—';
+  $('cOurs').textContent = money(r.total);
+  $('cOursPSF').textContent = r.A ? '$' + r.psf.toFixed(2) + '/SF' + (p.testsIncl ? ' · incl. ' + money(r.L.test) + ' testing' : ' · excl. testing') : '—';
+  $('cSave').textContent = money(r.save);
+  $('cSave').style.color = r.save >= 0 ? 'var(--ok)' : 'var(--danger)';
+  $('cSavePct').textContent = (r.savePct * 100).toFixed(1) + '% of the bid' + (r.A ? ' · $' + ((r.save) / r.A).toFixed(2) + '/SF' : '');
+  $('cAllIn').textContent = money(r.allInOurs) + ' vs ' + money(r.allInBid) + ' → ' + money(r.allInBid - r.allInOurs);
+
+  if (pieCat) { pieCat.data.datasets[0].data = r.cats.map(Math.round); pieCat.update(); }
+  if (pieType) { pieType.data.datasets[0].data = r.types.map(Math.round); pieType.update(); }
+  if (barCmp) {
+    r.types.forEach((v, i) => { barCmp.data.datasets[i].data = [Math.round(v), 0]; });
+    barCmp.data.datasets[TYPE_ORDER.length].data = [0, Math.round(r.bid)];
+    barCmp.update();
+  }
+  lineRows(p, r);
+  sensitivities(p, r);
+}
+
+function setAll(v) {
+  for (const g of Object.values(DIALS)) for (const d of g) { $(d[0]).value = v[d[0]]; $(d[0] + 'N').value = v[d[0]]; }
+  $('depth').value = v.depth; $('depthN').value = v.depth;
+  $('fillDaysAuto').checked = v.fillDaysAuto; $('testsAuto').checked = v.testsAuto; $('testsIncl').checked = v.testsIncl;
+  $('fillDays').value = v.fillDays; $('fillDaysN').value = v.fillDays;
+  $('tests').value = v.tests; $('testsN').value = v.tests;
+  for (const a of AREAS) { $(a.id + 'On').checked = a.on; $(a.id + 'SF').value = a.sf; if (a.custom) $(a.id + 'Name').value = a.name; }
+  updateUI();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderDials();
+  for (const g of Object.values(DIALS)) for (const d of g) bindPair(d[0], d[4], d[5], d[6]);
+  bindPair('depth', 1, 4, 0.25);
+  bindPair('fillDays', 0.5, 15, 0.5);
+  bindPair('tests', 0, 40, 1);
+  document.querySelectorAll('#depthSeg button').forEach(b => b.addEventListener('click', () => {
+    $('depth').value = b.dataset.v; $('depthN').value = b.dataset.v; updateUI();
+  }));
+  for (const a of AREAS) {
+    $(a.id + 'On').addEventListener('change', updateUI);
+    $(a.id + 'SF').addEventListener('input', () => {
+      if (a.custom && +$(a.id + 'SF').value > 0 && !$(a.id + 'On').dataset.touched) $(a.id + 'On').checked = true;
+      updateUI();
+    });
+    $(a.id + 'On').addEventListener('click', () => { $(a.id + 'On').dataset.touched = '1'; });
+    if (a.custom) $(a.id + 'Name').addEventListener('input', updateUI);
+  }
+  ['fillDaysAuto', 'testsAuto', 'testsIncl'].forEach(id => $(id).addEventListener('change', updateUI));
+  $('btnReset').addEventListener('click', () => setAll(DEFAULTS));
+  renderChecks();
+  updateUI();
+  initCharts();
+  updateUI();
+});
+</script>
+</body>
+</html>

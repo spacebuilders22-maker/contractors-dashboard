@@ -514,7 +514,7 @@
     <div>
       <h1>Infill, Compaction &amp; Slab-on-Grade — Full Cost Dashboard</h1>
       <div class="meta">
-        Stan Ivanov · 14224 NW 1st Ave, Miami · interior infill to raise floor + 4&Prime; slab · vs Florida Entry Builders fixed bid (Oct 1, 2026)
+        Stan Ivanov · 14224 NW 1st Ave, Miami · Inivos Group S1–S3 (sealed 10/10/2026): south bedroom wing only · ≤30&Prime; clean sand fill in 12&Prime; lifts @ 95% mod. Proctor · 6-mil visqueen · 4&Prime; 4,000 psi slab w/ 6×6 W1.4×W1.4 WWR · vs Florida Entry Builders lump sum (Oct 1, 2026, larger assumed scope)
       </div>
     </div>
     <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center">
@@ -542,11 +542,11 @@
       <summary>B · Fill &amp; compaction</summary>
       <div class="acc-body">
         <div class="param">
-          <label>Fill depth (ft) <span class="hint">1–4 ft · compacted in 1-ft lifts</span></label>
-          <div class="seg" id="depthSeg"><button type="button" data-v="2">2 ft</button><button type="button" data-v="3">3 ft</button></div>
+          <label>Fill depth (ft) <span class="hint">Inivos max 30&Prime; = 2.5 ft · 12&Prime; lifts, each compacted to 95% mod. Proctor</span></label>
+          <div class="seg" id="depthSeg"><button type="button" data-v="2">2 ft (24&Prime;)</button><button type="button" data-v="2.5">2.5 ft (30&Prime; max)</button></div>
           <div class="row">
-            <input type="range" id="depth" min="1" max="4" step="0.25" value="3" />
-            <input type="number" id="depthN" min="1" max="4" step="0.25" value="3" />
+            <input type="range" id="depth" min="0.5" max="4" step="0.25" value="2.5" />
+            <input type="number" id="depthN" min="0.5" max="4" step="0.25" value="2.5" />
           </div>
         </div>
         <div id="dialsB"></div>
@@ -593,19 +593,19 @@
     </details>
 
     <details class="acc" open>
-      <summary>E · Density testing (owner-paid)</summary>
+      <summary>E · Compaction testing &amp; certification (owner-paid)</summary>
       <div class="acc-body">
         <div id="dialsE1"></div>
         <div class="param">
-          <label>Number of tests (each) <span class="hint">auto = 1 per 1-ft lift per 1,000 SF</span></label>
+          <label>Field density tests (each) <span class="hint">auto = 1 per 12&Prime; lift per 1,000 SF (ASTM D1557 basis)</span></label>
           <div class="row">
-            <input type="range" id="tests" min="0" max="40" step="1" value="9" />
-            <input type="number" id="testsN" min="0" max="40" step="1" value="9" />
+            <input type="range" id="tests" min="0" max="40" step="1" value="6" />
+            <input type="number" id="testsN" min="0" max="40" step="1" value="6" />
           </div>
           <label class="auto-row"><input type="checkbox" id="testsAuto" checked /> auto: lifts × ⌈SF ÷ 1,000⌉</label>
         </div>
         <div class="toggle-row">
-          <span>Include testing in cost-plus total<br/><span class="hint">Florida Entry excludes it; owner pays either way · no fee on it</span></span>
+          <span>Include testing in cost-plus total<br/><span class="hint">Lab testing + certification required by S2/S3 · Florida Entry excluded it · no fee on it</span></span>
           <input type="checkbox" id="testsIncl" checked />
         </div>
       </div>
@@ -626,10 +626,10 @@
   <main class="main">
     <div class="kpi-grid">
       <div class="kpi bill"><div class="label">Cost-plus total</div><div class="value" id="kTotal">—</div><div class="sub" id="kTotalSub">direct + fee + testing</div></div>
-      <div class="kpi quote"><div class="label">Florida Entry bid</div><div class="value" id="kBid">—</div><div class="sub">fixed, proposal Oct 1, 2026</div></div>
+      <div class="kpi quote"><div class="label">Florida Entry bid</div><div class="value" id="kBid">—</div><div class="sub">lump sum, Oct 1, 2026 · larger assumed scope, re-price requested</div></div>
       <div class="kpi save"><div class="label">Savings vs bid</div><div class="value" id="kSave">—</div><div class="sub" id="kSavePct">—</div></div>
       <div class="kpi fair"><div class="label">Cost-plus $/SF</div><div class="value" id="kPSF">—</div><div class="sub" id="kPSFsub">—</div></div>
-      <div class="kpi"><div class="label">Materials</div><div class="value" id="kMat" style="font-size:1.05rem">—</div><div class="sub">fill, concrete, VB/mesh, dowels</div></div>
+      <div class="kpi"><div class="label">Materials</div><div class="value" id="kMat" style="font-size:1.05rem">—</div><div class="sub">sand fill, 4,000 psi concrete, visqueen + WWR, joints</div></div>
       <div class="kpi"><div class="label">Labor</div><div class="value" id="kLab" style="font-size:1.05rem">—</div><div class="sub">fill crew + slab crew</div></div>
       <div class="kpi"><div class="label">Equipment</div><div class="value" id="kEq" style="font-size:1.05rem">—</div><div class="sub">compactor/loader + pump</div></div>
       <div class="kpi"><div class="label">Fee (OH&amp;P)</div><div class="value" id="kFee" style="font-size:1.05rem">—</div><div class="sub" id="kFeeSub">—</div></div>
@@ -692,30 +692,32 @@
         <li>Saw-cut joints</li>
       </ul>
       <p style="margin-top:.5rem"><strong style="color:var(--text)">Warranty:</strong> 1-year workmanship warranty.</p>
+      <p><strong style="color:var(--warn)">Scope mismatch:</strong> the Oct 1 bid assumed a larger infill area (bedroom wing + converted garage + kitchen/dining/living ≈ 2,440 SF, ~3 ft deep). The sealed Inivos S1–S3 scope is the <strong>south bedroom wing only (~1,280 SF, ≤30&Prime; fill)</strong>, so the bid is shown for reference until Florida Entry re-prices it.</p>
       <p><strong style="color:var(--text)">No quantities:</strong> the proposal gives a lump sum only — no CY of fill, CY of concrete, SF of slab, or lift/compaction spec — so scope can't be checked line by line. Ask for quantities before comparing like-for-like.</p>
     </div>
 
     <div class="notes-card">
-      <h3>Sanity checks (defaults: 3 ft depth, 2,440 SF)</h3>
+      <h3>Sanity checks (defaults: 30&Prime; = 2.5 ft depth, 1,280 SF bedroom wing)</h3>
       <ul class="checks" id="checks"></ul>
     </div>
 
     <details class="model-notes">
       <summary>Model notes &amp; assumptions</summary>
       <div class="body">
-        <p><strong>Areas:</strong> Bedroom wing 1,250 SF; Garage (converted block — Bedrooms 04–05, Bath 03, laundry) 590 SF; Kitchen + dining + front half of living room 600 SF = 2,440 SF. Custom row is off / 0 SF by default.</p>
-        <p><strong>Fill:</strong> compacted CY = <code>SF × depth ft ÷ 27</code>. Loose (delivered) CY = <code>compacted × (1 + shrink %)</code>. Fill priced on loose CY at <code>$30/CY</code> delivered (Sunshine Coast Materials limerock fill, published price).</p>
-        <p><strong>Concrete:</strong> <code>SF × thickness in ÷ 12 ÷ 27</code> + thickened edge <code>LF × width × (edge depth − slab thickness) ÷ 27</code>, then × (1 + waste %). Priced at <code>$160/CY</code> delivered (Miami range $136–220/CY). Pump is a lump sum.</p>
-        <p><strong>Vapor barrier + WWF mesh + chairs:</strong> <code>SF × (1 + overlap %) × $/SF</code>. Dowels + epoxy into existing slab/footings: lump sum.</p>
+        <p><strong>Scope (Inivos Group S1–S3, sealed 10/10/2026):</strong> interior infill + new slab only under the south bedroom wing (hatched on S2/S3). ≈1,280 SF from plan widths 17&prime;-8½&Prime; (south end), 16&prime;-8&Prime; / 14&prime;-9&Prime; (mid) and 9&prime;-10¼&Prime; (north extension) — all VIF. Garage and kitchen/dining rows are kept for what-ifs but are <strong>off</strong> by default. Existing footings and 12&Prime; CMU remain; 1&Prime; separation joint at CMU.</p>
+        <p><strong>Fill:</strong> clean sand fill, max 30&Prime;, placed in 12&Prime; lifts each compacted to 95% of modified Proctor (ASTM D1557). Compacted CY = <code>SF × depth ft ÷ 27</code>. Loose (delivered) CY = <code>compacted × (1 + shrink %)</code>, priced at <code>$32/CY</code> delivered (Miami clean fill sand ≈ $25–40/CY).</p>
+        <p><strong>Concrete:</strong> <code>SF × thickness in ÷ 12 ÷ 27</code> + thickened edge <code>LF × width × (edge depth − slab thickness) ÷ 27</code>, then × (1 + waste %). 4,000 psi mix priced at <code>$170/CY</code> delivered (Miami range ≈ $140–220/CY). Pump is a lump sum.</p>
+        <p><strong>6-mil visqueen + 6×6 W1.4×W1.4 WWR (mid-depth, on chairs):</strong> <code>SF × (1 + overlap %) × $/SF</code>. Dowels default to $0 — S3 shows a 1&Prime; separation joint at the existing CMU, not doweling.</p>
+        <p><strong>Joints:</strong> contraction joints ≤ 12&prime; o.c. each way, saw-cut LF auto ≈ <code>SF × 2 ÷ 12</code>; 1&Prime; separation (isolation) joint along existing CMU, LF entered. <strong>Termite:</strong> soil pretreatment with certificate of compliance, <code>$/SF</code> of slab.</p>
         <p><strong>Labor:</strong> crew-day = people × $/hr × hr/day. Fill crew days auto = <code>⌈compacted CY ÷ CY/day⌉</code> (≈100 CY/day placed and compacted in lifts inside the house); untick auto to override. Compactor + small loader rental is charged per fill crew day. Slab crew = prep days (forming, steel, VB) + pour days.</p>
-        <p><strong>Density testing:</strong> auto = <code>⌈depth ft⌉ lifts × ⌈SF ÷ 1,000⌉</code> tests at ~$150 each. Owner-paid (Florida Entry excludes all testing), so no fee is applied to it.</p>
+        <p><strong>Compaction testing:</strong> auto = <code>⌈depth ft⌉ lifts × ⌈SF ÷ 1,000⌉</code> field density tests at ~$150 each, plus a lab modified-Proctor (ASTM D1557) curve and signed compaction certification report (lump sum). Owner-paid (Florida Entry excluded all testing), so no fee is applied to it.</p>
         <p><strong>Fee:</strong> contractor overhead &amp; profit % on direct cost (materials + labor + equipment). Cost-plus total = direct + fee (+ testing when included).</p>
-        <p>Not included on either side: demo, haul-off, footers/tie beams, unsuitable soil, utilities, A/E, survey, permits, curing, saw-cutting. Chart.js loads from CDN (needs network once).</p>
+        <p>Not included on either side: demo, haul-off, footers/tie beams (existing to remain), unsuitable soil, utilities, A/E, survey, permits, curing. Chart.js loads from CDN (needs network once).</p>
       </div>
     </details>
 
     <footer class="disclaimer">
-      Estimates for planning only. Cost-plus model built from published/local unit prices for 14224 NW 1st Ave, compared against Florida Entry Builders' fixed proposal of Oct 1, 2026.
+      Estimates for planning only. Cost-plus model built from published/local unit prices for 14224 NW 1st Ave, defaults set to the Inivos Group S1–S3 scope (sealed 10/10/2026); compared against Florida Entry Builders' Oct 1, 2026 lump sum (larger assumed scope).
       Not a contractor bid, not engineering, and not a substitute for a geotechnical/compaction spec, Miami-Dade permits, or inspections.
     </footer>
   </main>
@@ -723,25 +725,29 @@
 <script>
 const FE_BID = 53578.79;
 const AREAS = [
-  { id: 'a1', name: 'Bedroom wing', hint: '', sf: 1250, on: true },
-  { id: 'a2', name: 'Garage (converted block)', hint: 'Bedrooms 04–05, Bath 03, laundry', sf: 590, on: true },
-  { id: 'a3', name: 'Kitchen + dining + front ½ living', hint: '', sf: 600, on: true },
+  { id: 'a1', name: 'South bedroom wing (Inivos S2/S3 hatch)', hint: 'VIF', sf: 1280, on: true },
+  { id: 'a2', name: 'Garage (converted block)', hint: 'not in Inivos scope', sf: 590, on: false },
+  { id: 'a3', name: 'Kitchen + dining + front ½ living', hint: 'not in Inivos scope', sf: 600, on: false },
   { id: 'a4', name: 'Custom area', hint: 'rename / enter SF', sf: 0, on: false, custom: true }
 ];
 // id, label, unit (shown on line), hint, min, max, step, default
 const DIALS = {
   dialsB: [
     ['shrink', 'Compaction / shrink factor', '%', 'loose CY = compacted × (1 + %)', 0, 50, 1, 25],
-    ['fillPrice', 'Fill price', '$/CY', 'Sunshine Coast limerock, delivered', 10, 60, 0.5, 30]
+    ['fillPrice', 'Clean sand fill price', '$/CY', 'delivered · Miami ≈ $25–40/CY', 10, 60, 0.5, 32]
   ],
   dialsC: [
     ['thick', 'Slab thickness', 'in', '3.5–8 in', 3.5, 8, 0.5, 4],
     ['waste', 'Concrete waste', '%', 'on net CY', 0, 25, 1, 10],
-    ['concPrice', 'Concrete price', '$/CY', 'delivered · range $136–220/CY', 120, 260, 1, 160],
+    ['concPrice', 'Concrete price, 4,000 psi', '$/CY', 'delivered · range ≈ $140–220/CY', 120, 260, 1, 170],
     ['pump', 'Concrete pump', 'lump sum', '$ · 1 ls', 0, 3000, 50, 1300],
-    ['vbPrice', 'Vapor barrier + WWF mesh + chairs', '$/SF', 'material', 0.2, 1.5, 0.05, 0.5],
+    ['vbPrice', '6-mil visqueen + 6×6 W1.4×W1.4 WWR + chairs', '$/SF', 'material', 0.2, 1.5, 0.05, 0.5],
     ['vbOverlap', 'VB / mesh overlap', '%', 'laps + turn-ups', 0, 25, 1, 10],
-    ['dowels', 'Dowels + epoxy', 'lump sum', '$ · 1 ls', 0, 3000, 25, 600],
+    ['dowels', 'Dowels + epoxy', 'lump sum', '$ · not shown on S3 (1″ separation joint)', 0, 3000, 25, 0],
+    ['sawPrice', 'Saw-cut contraction joints ≤12′ o.c.', '$/LF', 'LF auto ≈ SF × 2 ÷ 12', 0, 6, 0.25, 2],
+    ['isoLF', '1″ separation joint at existing CMU', 'LF', 'VIF perimeter', 0, 400, 5, 180],
+    ['isoPrice', 'Separation joint material + install', '$/LF', '1″ joint filler', 0, 6, 0.25, 1.5],
+    ['termPrice', 'Termite pretreatment + certificate', '$/SF', 'soil treatment under slab', 0, 1.5, 0.05, 0.3],
     ['teLF', 'Thickened edge (optional)', 'LF', '0 = none', 0, 600, 5, 0],
     ['teW', 'Thickened edge width', 'in', 'bottom width', 6, 24, 1, 12],
     ['teD', 'Thickened edge total depth', 'in', 'incl. slab thickness', 6, 24, 1, 12]
@@ -750,7 +756,7 @@ const DIALS = {
     ['fillCrew', 'Fill crew size', 'people', 'placement + compaction', 1, 8, 1, 3],
     ['fillRate', 'Fill crew wage', '$/hr', 'per person', 15, 75, 1, 30],
     ['fillHrs', 'Fill crew hours', 'hr/day', '', 4, 12, 0.5, 8],
-    ['prod', 'Production rate', 'CY/day', 'compacted CY placed in lifts', 40, 250, 5, 100]
+    ['prod', 'Production rate', 'CY/day', 'compacted CY in 12″ lifts, interior access', 20, 250, 5, 60]
   ],
   dialsD2: [
     ['rent', 'Plate compactor + small loader rental', '$/day', 'per fill crew day', 0, 900, 10, 350]
@@ -763,20 +769,21 @@ const DIALS = {
     ['slabPour', 'Pour', 'day', '', 0, 3, 0.5, 1]
   ],
   dialsE1: [
-    ['testPrice', 'Density test price', '$/each', 'owner-paid', 50, 400, 5, 150]
+    ['testPrice', 'Field density test price', '$/each', 'owner-paid', 50, 400, 5, 150],
+    ['procPrice', 'Lab modified Proctor (ASTM D1557) + certification report', 'lump sum', '$ · 1 ls', 0, 1500, 25, 350]
   ],
   dialsF: [
     ['fee', 'Contractor overhead & profit fee', '%', 'on direct cost', 0, 35, 0.5, 15],
-    ['feBid', 'Florida Entry fixed bid', 'lump sum', '$ · proposal Oct 1, 2026', 30000, 90000, 0.01, FE_BID]
+    ['feBid', 'Florida Entry bid (larger scope)', 'lump sum', '$ · Oct 1, 2026 · re-price pending', 0, 90000, 0.01, FE_BID]
   ]
 };
-const DEFAULTS = { depth: 3, fillDays: 3, tests: 9, fillDaysAuto: true, testsAuto: true, testsIncl: true };
+const DEFAULTS = { depth: 2.5, fillDays: 2, tests: 6, fillDaysAuto: true, testsAuto: true, testsIncl: true };
 for (const g of Object.values(DIALS)) for (const d of g) DEFAULTS[d[0]] = d[7];
 
-const CAT_ORDER = ['Fill material', 'Concrete', 'VB / mesh / dowels', 'Fill crew labor', 'Slab crew labor', 'Equipment', 'Fee (OH&P)', 'Density testing'];
-const CAT_COLORS = ['#f59e0b', '#818cf8', '#a78bfa', '#3d9cf0', '#2dd4bf', '#fb7185', '#64748b', '#34d399'];
-const TYPE_ORDER = ['Materials', 'Labor', 'Equipment', 'Fee', 'Testing'];
-const TYPE_COLORS = ['#f59e0b', '#3d9cf0', '#fb7185', '#64748b', '#34d399'];
+const CAT_ORDER = ['Fill material', 'Concrete', 'VB / mesh / dowels', 'Joints', 'Termite pretreat', 'Fill crew labor', 'Slab crew labor', 'Equipment', 'Fee (OH&P)', 'Compaction testing'];
+const CAT_COLORS = ['#f59e0b', '#818cf8', '#a78bfa', '#c084fc', '#facc15', '#3d9cf0', '#2dd4bf', '#fb7185', '#64748b', '#34d399'];
+const TYPE_ORDER = ['Materials', 'Labor', 'Equipment', 'Subs (termite)', 'Fee', 'Testing'];
+const TYPE_COLORS = ['#f59e0b', '#3d9cf0', '#fb7185', '#facc15', '#64748b', '#34d399'];
 
 function $(id) { return document.getElementById(id); }
 function money(n) { const neg = n < 0; return (neg ? '-$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-US'); }
@@ -835,6 +842,7 @@ function compute(p) {
   const teCY = p.teLF * (p.teW / 12) * Math.max(0, (p.teD - p.thick) / 12) / 27;
   const concCY = (slabNetCY + teCY) * (1 + p.waste / 100);
   const vbSF = A * (1 + p.vbOverlap / 100);
+  const sawLF = A * 2 / 12;
   const autoDays = compCY > 0 ? Math.max(0.5, Math.ceil(compCY / p.prod)) : 0;
   const fillDays = p.fillDaysAuto ? autoDays : p.fillDays;
   const lifts = Math.ceil(p.depth - 1e-9);
@@ -854,12 +862,19 @@ function compute(p) {
     slabLab: slabCrewDay * slabDays,
     rent: p.rent * fillDays,
     pump: p.pump,
-    test: tests * p.testPrice
+    saw: sawLF * p.sawPrice,
+    iso: p.isoLF * p.isoPrice,
+    term: A * p.termPrice,
+    tests: tests * p.testPrice,
+    proc: A > 0 ? p.procPrice : 0
   };
-  const materials = L.fill + L.conc + L.vb + L.dowels;
+  L.test = L.tests + L.proc;
+  const joints = L.saw + L.iso;
+  const materials = L.fill + L.conc + L.vb + L.dowels + joints;
+  const subs = L.term;
   const labor = L.fillLab + L.slabLab;
   const equip = L.rent + L.pump;
-  const direct = materials + labor + equip;
+  const direct = materials + labor + equip + subs;
   const fee = direct * p.fee / 100;
   const costPlus = direct + fee;
   const testing = p.testsIncl ? L.test : 0;
@@ -867,13 +882,13 @@ function compute(p) {
   const bid = p.feBid;
   const save = bid - total;
   return {
-    A, compCY, looseCY, slabNetCY, teCY, concCY, vbSF, autoDays, fillDays, lifts, autoTests, tests,
+    A, compCY, looseCY, slabNetCY, teCY, concCY, vbSF, sawLF, joints, subs, autoDays, fillDays, lifts, autoTests, tests,
     fillCrewDay, slabCrewDay, slabDays, L, materials, labor, equip, direct, fee, costPlus, testing, total, bid, save,
     savePct: bid > 0 ? save / bid : 0,
     psf: A > 0 ? total / A : 0, bidPsf: A > 0 ? bid / A : 0,
     allInOurs: costPlus + L.test, allInBid: bid + L.test,
-    cats: [L.fill, L.conc, L.vb + L.dowels, L.fillLab, L.slabLab, equip, fee, testing],
-    types: [materials, labor, equip, fee, testing]
+    cats: [L.fill, L.conc, L.vb + L.dowels, joints, L.term, L.fillLab, L.slabLab, equip, fee, testing],
+    types: [materials, labor, equip, subs, fee, testing]
   };
 }
 
@@ -920,10 +935,14 @@ function lineRows(p, r) {
   h += cat('Infill areas', 0).replace('$0', num(r.A) + ' SF');
   for (const a of p.areas) h += `<tr${a.on ? '' : ' class="off"'}><td>${esc(a.name)}${a.on ? '' : ' (off)'}</td><td class="num">${num(a.sf)}</td><td>SF</td><td class="num">—</td><td class="num">—</td></tr>`;
   h += cat('Materials', r.materials);
-  h += row('Limerock fill, delivered (loose CY; ' + num(r.compCY, 1) + ' CY compacted × ' + (1 + p.shrink / 100).toFixed(2) + ')', num(r.looseCY, 1), 'CY', money2(p.fillPrice) + '/CY', L.fill);
-  h += row('Ready-mix concrete, ' + p.thick + ' in slab' + (r.teCY > 0 ? ' + thickened edge' : '') + ' (+' + p.waste + '% waste)', num(r.concCY, 1), 'CY', money2(p.concPrice) + '/CY', L.conc);
-  h += row('Vapor barrier + WWF mesh + chairs (+' + p.vbOverlap + '% overlap)', num(r.vbSF), 'SF', '$' + p.vbPrice.toFixed(2) + '/SF', L.vb);
-  h += row('Dowels + epoxy', '1', 'lump sum', money2(p.dowels) + ' lump sum', L.dowels);
+  h += row('Clean sand fill, delivered (loose CY; ' + num(r.compCY, 1) + ' CY compacted × ' + (1 + p.shrink / 100).toFixed(2) + ')', num(r.looseCY, 1), 'CY', money2(p.fillPrice) + '/CY', L.fill);
+  h += row('Ready-mix concrete 4,000 psi, ' + p.thick + ' in slab' + (r.teCY > 0 ? ' + thickened edge' : '') + ' (+' + p.waste + '% waste)', num(r.concCY, 1), 'CY', money2(p.concPrice) + '/CY', L.conc);
+  h += row('6-mil visqueen + 6×6 W1.4×W1.4 WWR mid-depth + chairs (+' + p.vbOverlap + '% overlap)', num(r.vbSF), 'SF', '$' + p.vbPrice.toFixed(2) + '/SF', L.vb);
+  h += row('Dowels + epoxy (not shown on S3)', '1', 'lump sum', money2(p.dowels) + ' lump sum', L.dowels, !p.dowels);
+  h += row('Saw-cut contraction joints, ≤12′ o.c. each way (≈ SF × 2 ÷ 12)', num(r.sawLF), 'LF', '$' + p.sawPrice.toFixed(2) + '/LF', L.saw);
+  h += row('1″ separation joint at existing CMU', num(p.isoLF), 'LF', '$' + p.isoPrice.toFixed(2) + '/LF', L.iso);
+  h += cat('Subcontract', r.subs);
+  h += row('Termite soil pretreatment + certificate of compliance', num(r.A), 'SF', '$' + p.termPrice.toFixed(2) + '/SF', L.term);
   h += cat('Labor', r.labor);
   h += row('Fill placement + compaction crew (' + p.fillCrew + ' people × $' + p.fillRate + '/hr × ' + p.fillHrs + ' hr/day = ' + money(r.fillCrewDay) + '/day)', num(r.fillDays, r.fillDays % 1 ? 1 : 0), 'day', money(r.fillCrewDay) + '/day', L.fillLab);
   h += row('Slab crew — forming, steel, VB (' + p.slabCrew + ' people × $' + p.slabRate + '/hr × ' + p.slabHrs + ' hr/day)', num(p.slabPrep, p.slabPrep % 1 ? 1 : 0), 'day', money(r.slabCrewDay) + '/day', r.slabCrewDay * p.slabPrep);
@@ -933,10 +952,11 @@ function lineRows(p, r) {
   h += row('Concrete pump', '1', 'lump sum', money2(p.pump) + ' lump sum', L.pump);
   h += cat('Fee', r.fee);
   h += row('Contractor overhead & profit on direct ' + money(r.direct), p.fee + '%', '% of direct', '—', r.fee);
-  h += cat('Density testing (owner-paid, no fee)', r.L.test);
-  h += row('Field density tests (' + r.lifts + ' lifts × ⌈' + num(r.A) + ' SF ÷ 1,000⌉' + (p.testsAuto ? '' : ', manual') + ')' + (p.testsIncl ? '' : ' — not in total'), num(r.tests), 'each', money2(p.testPrice) + '/each', L.test, !p.testsIncl);
+  h += cat('Compaction testing &amp; certification (owner-paid, no fee)', r.L.test);
+  h += row('Field density tests, 95% mod. Proctor (' + r.lifts + ' × 12″ lifts × ⌈' + num(r.A) + ' SF ÷ 1,000⌉' + (p.testsAuto ? '' : ', manual') + ')' + (p.testsIncl ? '' : ' — not in total'), num(r.tests), 'each', money2(p.testPrice) + '/each', L.tests, !p.testsIncl);
+  h += row('Lab modified Proctor (ASTM D1557) + compaction certification report' + (p.testsIncl ? '' : ' — not in total'), '1', 'lump sum', money2(p.procPrice) + ' lump sum', L.proc, !p.testsIncl);
   h += `<tr class="tot"><td colspan="4">Cost-plus total${p.testsIncl ? ' (incl. testing)' : ''}</td><td class="num">${money(r.total)}</td></tr>`;
-  h += `<tr><td colspan="4">Florida Entry Builders fixed bid (no quantities given)</td><td class="num">${money2(r.bid)}</td></tr>`;
+  h += `<tr><td colspan="4">Florida Entry Builders lump sum, Oct 1 (no quantities; larger assumed scope ≈ 2,440 SF)</td><td class="num">${money2(r.bid)}</td></tr>`;
   h += `<tr class="tot"><td colspan="4" style="color:var(--ok)">Savings</td><td class="num" style="color:var(--ok)">${money(r.save)}</td></tr>`;
   $('lineRows').innerHTML = h;
 }
@@ -944,8 +964,8 @@ function lineRows(p, r) {
 function sensitivities(p, r) {
   const alt = (ch) => compute(Object.assign({}, p, ch)).total;
   const items = [
-    { item: 'Fill depth 2 ft instead of ' + p.depth + ' ft', note: 'fill, crew days, rental and tests all drop', d: r.total - alt({ depth: 2 }) },
-    { item: 'Concrete at $136/CY (low end)', note: 'vs ' + money2(p.concPrice) + '/CY on ' + num(r.concCY, 1) + ' CY', d: r.total - alt({ concPrice: 136 }) },
+    { item: 'Fill depth 2 ft (24″) instead of ' + p.depth + ' ft', note: 'fill, crew days, rental and tests all drop', d: r.total - alt({ depth: 2 }) },
+    { item: 'Concrete at $140/CY (low end)', note: 'vs ' + money2(p.concPrice) + '/CY on ' + num(r.concCY, 1) + ' CY', d: r.total - alt({ concPrice: 140 }) },
     { item: 'Concrete at $220/CY (high end)', note: 'risk if the ready-mix quote comes in high', d: r.total - alt({ concPrice: 220 }) },
     { item: 'Fee 10% instead of ' + p.fee + '%', note: 'OH&P on ' + money(r.direct) + ' direct', d: r.total - alt({ fee: 10 }) },
     { item: 'Shrink factor 20% instead of ' + p.shrink + '%', note: 'fewer loose CY delivered', d: r.total - alt({ shrink: 20 }) },
@@ -966,9 +986,9 @@ function renderChecks() {
     return `<li><span>${label}</span><span class="st ${ok ? 'pass' : 'fail'}">${num(val, 1)} ${unit} · target ≈ ${target} ${unit} ${ok ? '✓' : '✗'}</span></li>`;
   };
   $('checks').innerHTML =
-    chk('Compacted fill (2,440 SF × 3 ft ÷ 27)', d.compCY, 271, 'CY') +
-    chk('Loose fill (× 1.25 shrink)', d.looseCY, 339, 'CY') +
-    chk('Concrete (2,440 SF × 4 in, +10% waste)', d.concCY, 33, 'CY') +
+    chk('Compacted fill (1,280 SF × 2.5 ft ÷ 27)', d.compCY, 118.5, 'CY') +
+    chk('Loose fill (× 1.25 shrink)', d.looseCY, 148.1, 'CY') +
+    chk('Concrete (1,280 SF × 4 in, +10% waste)', d.concCY, 17.4, 'CY') +
     `<li><span>Defaults → cost-plus total</span><span class="st">${money(d.total)} · savings ${money(d.save)} (${(d.savePct * 100).toFixed(1)}%)</span></li>`;
 }
 
@@ -999,7 +1019,7 @@ function updateUI() {
   $('kBid').textContent = money2(r.bid);
   $('kSave').textContent = money(r.save);
   $('kSave').style.color = r.save >= 0 ? 'var(--ok)' : 'var(--danger)';
-  $('kSavePct').textContent = (r.savePct * 100).toFixed(1) + '% below the bid';
+  $('kSavePct').textContent = (r.savePct * 100).toFixed(1) + '% below the Oct 1 bid (larger scope — not like-for-like)';
   $('kPSF').textContent = r.A ? '$' + r.psf.toFixed(2) + '/SF' : '—';
   $('kPSFsub').textContent = r.A ? 'Florida Entry $' + r.bidPsf.toFixed(2) + '/SF at ' + num(r.A) + ' SF' : 'no area selected';
   $('kMat').textContent = money(r.materials);
